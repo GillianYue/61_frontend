@@ -1,21 +1,17 @@
-import React, { useState }from 'react';
-import AppBar from '@material-ui/core/AppBar';
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
-import StarIcon from '@material-ui/icons/StarBorder';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
-import SearchBar from 'material-ui-search-bar';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridList from '@material-ui/core/GridList';
 import MaterialTable from "material-table";
 
 //
@@ -66,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1, 1.5),
   },
   heroContent: {
-    padding: theme.spacing(8, 0, 6),
+    // padding: theme.spacing(8, 0, 6),
   },
   cardHeader: {
     backgroundColor:
@@ -87,152 +83,229 @@ const useStyles = makeStyles((theme) => ({
       paddingTop: theme.spacing(6),
       paddingBottom: theme.spacing(6),
     },
-    cr: {
-      marginBottom: theme.spacing(5),
-    },
-    paper: {
-      background: 'black'
-    }
   },
+  cr: {
+    marginBottom: theme.spacing(5),
+  },
+  gl: {
+    width: 350,
+    maxHeight: 580,
+    overflow: 'auto',
+    transform: 'translateZ(0)',
+    padding: 20, 
+    height: "70%", 
+    backgroundColor: '#eeeeee',
+    borderRadius: 10,
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingLeft: 30
+  }
 }));
 
 const tiers = [
   {
-    title: 'Free',
-    price: '0',
-    description: ['10 users included', '2 GB of storage', 'Help center access', 'Email support'],
-    buttonText: 'Sign up for free',
+    title: 'Request Package 1',
+    player: 'player 1',
+    subheader: 'buy',
+    description: ['some description', ],
+    buttonText: 'Accept',
+    buttonText2: 'Decline',
     buttonVariant: 'outlined',
   },
   {
-    title: 'Pro',
-    subheader: 'Most popular',
-    price: '15',
+    title: 'Request Package 2',
+    subheader: 'sell',
+    player: 'some person',
     description: [
-      '20 users included',
-      '10 GB of storage',
-      'Help center access',
-      'Priority email support',
+      'blah',
     ],
-    buttonText: 'Get started',
+    buttonText: 'Accept',
+    buttonText2: 'Decline',
     buttonVariant: 'contained',
   },
   {
-    title: 'Enterprise',
-    price: '30',
+    title: 'Package 32',
+    player: 'player',
     description: [
-      '50 users included',
-      '30 GB of storage',
-      'Help center access',
-      'Phone & email support',
+      'bleh',
     ],
-    buttonText: 'Contact us',
+    buttonText: 'Accept',
+    buttonText2: 'Decline',
+    buttonVariant: 'outlined',
+  },
+  {
+    title: 'Package 33',
+    player: 'player',
+    description: [
+      'bleh',
+    ],
+    buttonText: 'Accept',
+    buttonText2: 'Decline',
+    buttonVariant: 'outlined',
+  },
+  {
+    title: 'Package 34',
+    player: 'player',
+    description: [
+      'bleh',
+    ],
+    buttonText: 'Accept',
+    buttonText2: 'Decline',
+    buttonVariant: 'outlined',
+  },
+  {
+    title: 'Package 35',
+    player: 'player',
+    description: [
+      'bleh',
+    ],
+    buttonText: 'Accept',
+    buttonText2: 'Decline',
     buttonVariant: 'outlined',
   },
 ];
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [search, setSearch] = useState('');
+  const [state, setState] = React.useState({
+    columns: [
+      { title: "First", field: "name" },
+      { title: "Last", field: "surname" },
+      { title: "Age", field: "age", type: "numeric" },
+      {
+        title: "Salary",
+        field: "salary",
+        type: "numeric"
+      }
+    ],
+    data: [
+      { name: "Test", surname: "Player", age: 32, salary: 33 },
+      { name: "Some", surname: "Person", age: 27, salary: 2000 }
+    ],
+  });
 
   return (
     <React.Fragment>
-      <CssBaseline />
-      <AppBar position="static" color="default" elevation={0} className={classes.appBar}>
-        <Toolbar className={classes.toolbar}>
-          <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
-            TransferMarkt
-          </Typography>
-          <SearchBar
-      onChange={(t) => setSearch(t)}
-      onRequestSearch={() => console.log('onRequestSearch')}//TODO
-      value={search}
-      style={{
-        margin: '0 auto',
-        maxWidth: 1000,
-      
-      }}/>
-          <nav>
-          <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
-            Welcome back, 
-          </Typography>
-            <Link variant="button" color="textPrimary" href="#" className={classes.link}>
-              username
-            </Link>
-          </nav>
-          <Button href="#" color="primary" variant="outlined" className={classes.link}>
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-      {/* Hero unit */}
-      <Container maxWidth="sm" component="main" className={classes.heroContent}>
-      <Box>
-        <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
+
+      <Container component="main" 
+      style={{ maxWidth: '100%' }}
+      className={classes.heroContent}>
+        <Grid container direction="row" style={{justifyContent: 'space-around',}}>
+      <Box style={{width: '60%', margin: 30}}>
+        <Typography component="h1" style={{marginBottom: 20}}
+        variant="h5" align="center" color="textPrimary" gutterBottom>
           My Team
         </Typography>
         
           <MaterialTable
-          columns={[
-            { title: "First", field: "name" },
-            { title: "Last", field: "surname" },
-            { title: "Age", field: "age", type: "numeric" },
-            {
-              title: "Salary",
-              field: "salary",
-              type: "numeric"
-            }
-          ]}
-          data={[
-            { name: "Test", surname: "Player", age: 32, salary: 33 },
-            { name: "Some", surname: "Person", age: 27, salary: 2000 }
-          ]}
+columns={state.columns}
+data={state.data}
           title="Demo Title"
           icons={tableIcons}
+
+          editable={{
+            onRowAdd: (newData) =>
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve();
+                  setState((prevState) => {
+                    const data = [...prevState.data];
+                    data.push(newData);
+                    return { ...prevState, data };
+                  });
+                }, 600);
+              }),
+            onRowUpdate: (newData, oldData) =>
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve();
+                  if (oldData) {
+                    setState((prevState) => {
+                      const data = [...prevState.data];
+                      data[data.indexOf(oldData)] = newData;
+                      return { ...prevState, data };
+                    });
+                  }
+                }, 600);
+              }),
+            onRowDelete: (oldData) =>
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve();
+                  setState((prevState) => {
+                    const data = [...prevState.data];
+                    data.splice(data.indexOf(oldData), 1);
+                    return { ...prevState, data };
+                  });
+                }, 600);
+              }),
+          }}
         /></Box>
+
+<Box style={{ padding: 50, width: '35%', height: '70%',
+borderRadius: 10}} className={classes.paper}>
+
+<GridList 
+cellHeight={200} spacing={1} 
+className={classes.gl}>
+  {tiers.map((tier) => (
+    <GridListTile key={tier.title} cols={2} rows={1}>
+
+<Card style={{ width: '90%', alignSelf: 'center', margin: 10}}>
+        <CardHeader
+        style={{height: 30, backgroundColor: '#aaaaaa'}}
+          title={tier.title}
+          titleTypographyProps={{ align: 'center', variant:'body1' }}
+          className={classes.cardHeader}
+        />
+        <CardContent>
+          <div className={classes.cardPricing}>
+          <Typography variant="body1" color="textSecondary">
+              requested: 
+            </Typography>
+            <Typography component="body2" variant="body1" color="textPrimary">
+              {' '+tier.player}
+            </Typography>
+
+          </div>
+          <ul>
+            {tier.description.map((line) => (
+              <Typography component="li" variant="subtitle1" align="center" key={line}>
+                {line}
+              </Typography>
+            ))}
+          </ul>
+        </CardContent>
+        <CardActions>
+          <Button fullWidth variant='contained' color="primary" 
+          style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
+            <Typography variant="button">
+            {tier.buttonText}
+            </Typography>
+          </Button>
+          <Button fullWidth variant='outlined' color="primary"
+          style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
+              <Typography variant="display1">
+            {tier.buttonText2}
+            </Typography>
+          </Button>
+        </CardActions>
+      </Card>
+
+    </GridListTile>
+
+
+
+  ))}
+{/* </Grid> */}
+</GridList> 
+</Box>
+</Grid>
       </Container>
       {/* End hero unit */}
       <Container maxWidth="md" component="main">
-        <Paper className={classes.paper}/>
-        <Grid container spacing={5} direction="column" alignItems="flex-end">
-          {tiers.map((tier) => (
-            // Enterprise card is full width at sm breakpoint
-            <Grid item key={tier.title} xs={12} sm={tier.title === 'Enterprise' ? 12 : 6} md={4}>
-              <Card>
-                <CardHeader
-                  title={tier.title}
-                  subheader={tier.subheader}
-                  titleTypographyProps={{ align: 'center' }}
-                  subheaderTypographyProps={{ align: 'center' }}
-                  action={tier.title === 'Pro' ? <StarIcon /> : null}
-                  className={classes.cardHeader}
-                />
-                <CardContent>
-                  <div className={classes.cardPricing}>
-                    <Typography component="h2" variant="h3" color="textPrimary">
-                      ${tier.price}
-                    </Typography>
-                    <Typography variant="h6" color="textSecondary">
-                      /mo
-                    </Typography>
-                  </div>
-                  <ul>
-                    {tier.description.map((line) => (
-                      <Typography component="li" variant="subtitle1" align="center" key={line}>
-                        {line}
-                      </Typography>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardActions>
-                  <Button fullWidth variant={tier.buttonVariant} color="primary">
-                    {tier.buttonText}
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+     
+
       </Container>
       {/* Footer */}
 

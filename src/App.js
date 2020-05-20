@@ -1,7 +1,9 @@
 import React from 'react';
-import Thing from './components/Thing';
+import SearchResult from './components/SearchResult';
 import SignIn from './signin';
-import Dashboard from './dashboard'
+import Dashboard from './dashboard';
+import TopBar from './components/topbar.js';
+import Profile from './profile';
 import './App.css';
 import {
   BrowserRouter as Router,
@@ -9,19 +11,27 @@ import {
   Route,
 } from "react-router-dom";
 
+
 function App() {
+
   return (
     <Router>
-      <div>
 
+      <div>
         <Switch>
           <Route path="/signin">
             <SignIn />
           </Route>
-          <Route path="/thing">
-            <Thing />
+          <Route path="/search">
+          <TopBar />
+            <SearchResult />
+          </Route>
+          <Route path="/profile">
+          <TopBar />
+            <Profile />
           </Route>
           <Route path="/">
+          <TopBar />
             <Dashboard />
           </Route>
         </Switch>
