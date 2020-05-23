@@ -55,15 +55,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Profile() {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
-
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
 
   return (
     <React.Fragment>
@@ -74,21 +65,11 @@ export default function Profile() {
             Player/Team name
           </Typography>
           <React.Fragment>
-            {0 ? (
+            {
               <React.Fragment>
-                <Typography variant="h5" gutterBottom>
-                  Thank you for your order.
-                </Typography>
-                <Typography variant="subtitle1">
-                  Your order number is #2001539. We have emailed your order confirmation, and will
-                  send you an update when your order has shipped.
-                </Typography>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
- <Typography variant="h6" gutterBottom>
-        Shipping address
-      </Typography>
+ {/* <Typography variant="h6" gutterBottom>
+        (team name if player)
+      </Typography> */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -114,18 +95,18 @@ export default function Profile() {
         <Grid item xs={12}>
           <TextField
             required
-            id="address1"
-            name="address1"
-            label="Address line 1"
+            id="playerId"
+            name="playerID"
+            label="Player ID"
             fullWidth
             autoComplete="billing address-line1"
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <TextField
-            id="address2"
-            name="address2"
-            label="Address line 2"
+            id="teamName"
+            name="teamName"
+            label="Team"
             fullWidth
             autoComplete="billing address-line2"
           />
@@ -133,9 +114,9 @@ export default function Profile() {
         <Grid item xs={12} sm={6}>
           <TextField
             required
-            id="city"
-            name="city"
-            label="City"
+            id="teamID"
+            name="teamID"
+            label="Team ID"
             fullWidth
             autoComplete="billing address-level2"
           />
@@ -166,13 +147,13 @@ export default function Profile() {
         <Grid item xs={12}>
           <FormControlLabel
             control={<Checkbox color="secondary" name="saveAddress" value="yes" />}
-            label="Use this address for payment details"
+            label="Add info to notes"
           />
         </Grid>
       </Grid>
 
               </React.Fragment>
-            )}
+            }
           </React.Fragment>
         </Paper>
         <Copyright />

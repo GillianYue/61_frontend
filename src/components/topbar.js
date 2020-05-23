@@ -8,6 +8,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -36,6 +38,8 @@ const useStyles = makeStyles((theme) => ({
 export default function TopBar() {
     const classes = useStyles();
     const [search, setSearch] = useState('');
+    const [dropDown, setDropDown] = useState(1);
+
     return(
       <div>
       <CssBaseline />
@@ -44,6 +48,16 @@ export default function TopBar() {
                 <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
                   TransferMarkt
                 </Typography>
+                <Select
+                style={{marginRight: 30}}
+          labelId="demo-simple-select-required-label"
+          id="demo-simple-select-required"
+          value={dropDown}
+          onChange={(event)=>{setDropDown(event.target.value)}}
+          className={classes.selectEmpty}
+        ><MenuItem value={1}>Player</MenuItem>
+        <MenuItem value={2}>Team</MenuItem>
+      </Select>
                 <SearchBar
             onChange={(t) => setSearch(t)}
             onRequestSearch={() => console.log('onRequestSearch')}//TODO
@@ -52,7 +66,7 @@ export default function TopBar() {
               margin: '0 auto',
               maxWidth: 1000,
               width: 400,
-            marginRight: 150,
+            marginRight: 130,
             }}/>
                 <Grid container direction="row" style={{width: 230, flexDirection: 'row',
               justifyContent: 'flex-start', alignItems: 'center'}}>

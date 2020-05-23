@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { Component, useState } from 'react';
+import { connect } from 'react-redux';
+import { } from './actions';
+
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -13,6 +20,7 @@ import Paper from '@material-ui/core/Paper';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridList from '@material-ui/core/GridList';
 import MaterialTable from "material-table";
+import IconButton from '@material-ui/core/IconButton';
 
 //
 import { forwardRef } from 'react';
@@ -33,6 +41,8 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 //
 
+import { FaPlusSquare as AddIcon } from 'react-icons/fa';
+
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center" >
@@ -40,67 +50,6 @@ function Copyright() {
     </Typography>
   );
 }
-
-const useStyles = makeStyles((theme) => ({
-  '@global': {
-    ul: {
-      margin: 0,
-      padding: 0,
-      listStyle: 'none',
-    },
-  },
-  appBar: {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-  toolbar: {
-    flexWrap: 'wrap',
-  },
-  toolbarTitle: {
-    flexGrow: 1,
-  },
-  link: {
-    margin: theme.spacing(1, 1.5),
-  },
-  heroContent: {
-    // padding: theme.spacing(8, 0, 6),
-  },
-  cardHeader: {
-    backgroundColor:
-      theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
-  },
-  cardPricing: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'baseline',
-    marginBottom: theme.spacing(2),
-  },
-  footer: {
-    borderTop: `1px solid ${theme.palette.divider}`,
-    marginTop: theme.spacing(8),
-    paddingTop: theme.spacing(3),
-    paddingBottom: theme.spacing(3),
-    [theme.breakpoints.up('sm')]: {
-      paddingTop: theme.spacing(6),
-      paddingBottom: theme.spacing(6),
-    },
-  },
-  cr: {
-    marginBottom: theme.spacing(5),
-  },
-  gl: {
-    width: 350,
-    maxHeight: 580,
-    overflow: 'auto',
-    transform: 'translateZ(0)',
-    padding: 20, 
-    height: "70%", 
-    backgroundColor: '#eeeeee',
-    borderRadius: 10,
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    paddingLeft: 30
-  }
-}));
 
 const tiers = [
   {
@@ -165,31 +114,219 @@ const tiers = [
   },
 ];
 
-export default function Dashboard() {
-  const classes = useStyles();
-  const [state, setState] = React.useState({
-    columns: [
-      { title: "First", field: "name" },
-      { title: "Last", field: "surname" },
-      { title: "Age", field: "age", type: "numeric" },
-      {
-        title: "Salary",
-        field: "salary",
-        type: "numeric"
-      }
-    ],
-    data: [
-      { name: "Test", surname: "Player", age: 32, salary: 33 },
-      { name: "Some", surname: "Person", age: 27, salary: 2000 }
-    ],
-  });
+const styles = {
+  '@global': {
+    ul: {
+      margin: 0,
+      padding: 0,
+      listStyle: 'none',
+    },
+  },
+  appBar: {
+  },
+  toolbar: {
+    flexWrap: 'wrap',
+  },
+  toolbarTitle: {
+    flexGrow: 1,
+  },
+  link: {
+    margin: 10,
+  },
+  footer: {
+    marginTop: 60,
+    paddingTop: 24,
+    paddingBottom: 24,
+  },
+  cr: {
+    marginBottom: 40,
+  },
+  gl: {
+    width: 350,
+    maxHeight: 580,
+    overflow: 'auto',
+    transform: 'translateZ(0)',
+    padding: 20, 
+    height: "70%", 
+    backgroundColor: '#eeeeee',
+    borderRadius: 10,
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingLeft: 30
+  },
+  hoverOpacity: {
+    opacity: 0.8,
+  },
+  unhoverOpacity: {
+    opacity: 1,
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0
+  },
+  paper: {
+    backgroundColor: '#eeeeee',
+    borderWidth: 0,
+    borderRadius: 10,
+    padding: 30,
+    width: 750,
+    height: 600,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'column'
+  },
+};
 
+class PendingPackage extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      opacity: 1,
+  }
+}
+
+  render(){
+    const tier = this.props.tier;
+  return (              
+    <GridListTile key={tier.title} cols={2} rows={1}>
+
+    <Card style={{ width: '90%', alignSelf: 'center', margin: 10, opacity: this.state.opacity}}
+    onMouseEnter={() => this.setState({opacity: 0.6})}
+        onMouseLeave={() => this.setState({opacity: 1})}
+        onClick={()=> this.props.click(this.props.tier)}>
+          <CardHeader
+          style={{height: 30, backgroundColor: '#aaaaaa'}}
+            title={tier.title}
+            titleTypographyProps={{ align: 'center', variant:'body1' }}
+          />
+          <CardContent>
+            <div>
+            <Typography variant="body1" color="textSecondary">
+                requested: 
+              </Typography>
+              <Typography component="body2" variant="body1" color="textPrimary">
+                {' '+tier.player}
+              </Typography>
+  
+            </div>
+            <ul>
+              {tier.description.map((line) => (
+                <Typography component="li" variant="subtitle1" align="center" key={line}>
+                  {line}
+                </Typography>
+              ))}
+            </ul>
+          </CardContent>
+          <CardActions>
+            <Button fullWidth variant='contained' color="primary" 
+            style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
+              <Typography variant="button">
+              {tier.buttonText}
+              </Typography>
+            </Button>
+            <Button fullWidth variant='outlined' color="primary"
+            style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
+                <Typography variant="display1">
+              {tier.buttonText2}
+              </Typography>
+            </Button>
+          </CardActions>
+        </Card>
+  
+      </GridListTile>
+      )
+        }
+
+}
+
+class Dashboard extends Component{
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      packageShown: {},
+      packageReadOnly: true,
+      columns: [
+          { title: "First", field: "name" },
+          { title: "Last", field: "surname" },
+          { title: "Age", field: "age", type: "numeric" },
+          {
+            title: "Salary",
+            field: "salary",
+            type: "numeric"
+          }
+        ],
+      data: [
+          { name: "Test", surname: "Player", age: 32, salary: 33 },
+          { name: "Some", surname: "Person", age: 27, salary: 2000 }
+        ],
+      modalOpen: false,
+    };
+
+  }
+
+
+  componentDidUpdate(prevProps){
+    if(this.props.orderById !== null && prevProps.orderById != this.props.orderById) {
+
+    }
+  }
+
+  handleOpen = () => {
+    this.setState({modalOpen: true});
+  };
+
+  handleClose = () => {
+    this.setState({modalOpen: false});
+  };
+
+  packageDetail (pkg, readOnly){
+
+    return (
+      <div> 
+    <Modal
+        aria-labelledby="spring-modal-title"
+        aria-describedby="spring-modal-description"
+        style={styles.modal}
+        open={this.state.modalOpen}
+        onClose={this.handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={this.state.modalOpen}>
+          <div style={styles.paper}>
+            <div>Requests in this package: </div>
+              <div style={{backgroundColor: '#8c94a1', width: '85%', height: '40%',
+            opacity: 0.1, borderRadius: 5, alignSelf: 'center'}}>
+                
+              </div>
+
+
+      <form noValidate autoComplete="off">
+          <TextField id="standard-basic" label="Standard" />
+          <TextField id="filled-basic" label="Filled" variant="filled" />
+          <TextField id="outlined-basic" label="Outlined" variant="outlined" />
+</form>
+          </div>
+        </Fade>
+      </Modal>
+    </div>)
+  }
+
+render(){
   return (
     <React.Fragment>
 
+{this.packageDetail(this.state.packageShown, this.state.packageReadOnly)}
       <Container component="main" 
       style={{ maxWidth: '100%' }}
-      className={classes.heroContent}>
+      className={styles.heroContent}>
         <Grid container direction="row" style={{justifyContent: 'space-around',}}>
       <Box style={{width: '60%', margin: 30}}>
         <Typography component="h1" style={{marginBottom: 20}}
@@ -198,9 +335,9 @@ export default function Dashboard() {
         </Typography>
         
           <MaterialTable
-columns={state.columns}
-data={state.data}
-          title="Demo Title"
+              columns={this.state.columns}
+              data={this.state.data}
+          title="Team Name"
           icons={tableIcons}
 
           editable={{
@@ -208,7 +345,7 @@ data={state.data}
               new Promise((resolve) => {
                 setTimeout(() => {
                   resolve();
-                  setState((prevState) => {
+                  this.setState((prevState) => {
                     const data = [...prevState.data];
                     data.push(newData);
                     return { ...prevState, data };
@@ -220,7 +357,7 @@ data={state.data}
                 setTimeout(() => {
                   resolve();
                   if (oldData) {
-                    setState((prevState) => {
+                    this.setState((prevState) => {
                       const data = [...prevState.data];
                       data[data.indexOf(oldData)] = newData;
                       return { ...prevState, data };
@@ -232,7 +369,7 @@ data={state.data}
               new Promise((resolve) => {
                 setTimeout(() => {
                   resolve();
-                  setState((prevState) => {
+                  this.setState((prevState) => {
                     const data = [...prevState.data];
                     data.splice(data.indexOf(oldData), 1);
                     return { ...prevState, data };
@@ -243,64 +380,29 @@ data={state.data}
         /></Box>
 
 <Box style={{ padding: 50, width: '35%', height: '70%',
-borderRadius: 10}} className={classes.paper}>
+borderRadius: 10}} className={styles.paper}>
+<IconButton color="primary" aria-label="upload picture" component="span"
+onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
+    <AddIcon />
+</IconButton>
 
-<GridList 
-cellHeight={200} spacing={1} 
-className={classes.gl}>
-  {tiers.map((tier) => (
-    <GridListTile key={tier.title} cols={2} rows={1}>
-
-<Card style={{ width: '90%', alignSelf: 'center', margin: 10}}>
-        <CardHeader
-        style={{height: 30, backgroundColor: '#aaaaaa'}}
-          title={tier.title}
-          titleTypographyProps={{ align: 'center', variant:'body1' }}
-          className={classes.cardHeader}
-        />
-        <CardContent>
-          <div className={classes.cardPricing}>
-          <Typography variant="body1" color="textSecondary">
-              requested: 
-            </Typography>
-            <Typography component="body2" variant="body1" color="textPrimary">
-              {' '+tier.player}
-            </Typography>
-
-          </div>
-          <ul>
-            {tier.description.map((line) => (
-              <Typography component="li" variant="subtitle1" align="center" key={line}>
-                {line}
-              </Typography>
-            ))}
-          </ul>
-        </CardContent>
-        <CardActions>
-          <Button fullWidth variant='contained' color="primary" 
-          style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
-            <Typography variant="button">
-            {tier.buttonText}
-            </Typography>
-          </Button>
-          <Button fullWidth variant='outlined' color="primary"
-          style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
-              <Typography variant="display1">
-            {tier.buttonText2}
-            </Typography>
-          </Button>
-        </CardActions>
-      </Card>
-
-    </GridListTile>
-
-
-
-  ))}
-{/* </Grid> */}
+      <GridList 
+          cellHeight={200} spacing={1} 
+          style={styles.gl}>
+            {tiers.map((tier) => <PendingPackage tier={tier} 
+            click={() => this.setState({ modalOpen: true, packageShown: tier, 
+              packageReadOnly: true })}
+            />)}
 </GridList> 
 </Box>
 </Grid>
+
+<Box style={{width: '50%', height: '35%', borderWidth: 2, borderColor: 'grey'}}>
+  <Typography>
+  Display successful transfers
+  </Typography>
+</Box>
+
       </Container>
       {/* End hero unit */}
       <Container maxWidth="md" component="main">
@@ -309,14 +411,34 @@ className={classes.gl}>
       </Container>
       {/* Footer */}
 
-        <Box mt={5} className={classes.cr}>
+        <Box mt={5}>
           <Copyright />
         </Box>
 
       {/* End footer */}
     </React.Fragment>
   );
+            }
+
+
 }
+
+function mapReduxStateToProps(reduxState) {
+  return {
+    // user: reduxState.user,
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    // createPaySess: (param) => {
+    //   dispatch(createPaySess(param));
+    // },
+
+  };
+};
+
+export default connect(mapReduxStateToProps, mapDispatchToProps)(Dashboard);
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
