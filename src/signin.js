@@ -7,7 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import { login, getTeam } from './actions/index';
+import { login } from './actions/index';
 import {
   withRouter
 } from 'react-router-dom'
@@ -47,7 +47,6 @@ class SignIn extends Component{
 componentDidUpdate(prevProps){
   if(this.props.signin_success !== prevProps.signin_success && 
     this.props.signin_success === 'success') {
-      this.props.getTeam({clubId: this.props.myClubId}, true);
       this.props.history.push('/')
   }
 }
@@ -127,9 +126,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     login: (param) => {
       dispatch(login(param));
-    },
-    getTeam: (param, own) => {
-      dispatch(getTeam(param, own));
     },
   };
 };

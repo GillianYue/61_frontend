@@ -14,10 +14,12 @@ export const ActionTypes = {
     GET_TRANSFERS: 'GET_TRANSFERS',
 
     GET_TEAM: 'GET_TEAM',
+    GET_TEAM_PLAYERS: 'GET_TEAM_PLAYERS',
     GET_OWN_TEAM: 'GET_OWN_TEAM',
+    GET_OWN_TEAM_PLAYERS: 'GET_OWN_TEAM_PLAYERS',
 
-    SEARCH_TEAM: 'SEARCH_TEAM',
-    SEARCH_PLAYER: 'SEARCH_PLAYER',
+    SEARCH_TEAMS: 'SEARCH_TEAMS',
+    SEARCH_PLAYERS: 'SEARCH_PLAYERS',
 
     MANAGER_SIGNIN: 'MANAGER_SIGNIN',
     MANAGER_SIGNOUT: 'MANAGER_SIGNOUT',
@@ -27,21 +29,18 @@ export const ActionTypes = {
 
 export const ROOT_URL = 'http://localhost:3000/api';
 
-axios.defaults.headers.common['Authorization'] = 'JWT ' + localStorage.getItem("token")
+axios.interceptors.request.use(
+  config => {
+    config.headers.authorization = 'JWT ' + localStorage.getItem("token");
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
-export function getPlayer(param) {
+export function getPlayer(id) {
   return (dispatch) => {
 
-    let config = {
-            params: {
-              FirstName: 'FirstName' in param ? param.FirstName: "",
-              LastName: 'LastName' in param ? param.LastName: "",
-            },
-    }
-
-    // console.log("data sent is "+JSON.stringify(config))
-
-    axios.get(`${ROOT_URL}/players`, config)
+    axios.get(`${ROOT_URL}/players/${id}`)
       .then((response) => {
         console.log("getting player: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.GET_PLAYER, payload: response.data });
@@ -54,21 +53,40 @@ export function getPlayer(param) {
   };
 }
 
-export function getTeam(param, isOwnTeam) {
+export function getTeam(id, isOwnTeam) {
   return (dispatch) => {
 
-    let config = {
-            params: {
-              ClubName: 'ClubName' in param ? param.clubName: "",
-              ClubId: 'ClubId' in param ? param.clubId: "",
-            },
-    }
-
-    axios.get(`${ROOT_URL}/clubs`, config)
+    const teamID = (isOwnTeam) ? localStorage.getItem('myClubId') : id;
+    axios.get(`${ROOT_URL}/clubs/${teamID}`)
       .then((response) => {
         console.log("getting club: "+JSON.stringify(response));
 
         dispatch({ type: isOwnTeam? ActionTypes.GET_OWN_TEAM: ActionTypes.GET_TEAM, 
+          payload: response.data });
+
+      })
+      .catch((error) => {
+        console.log("get club failed: "+ JSON.stringify(error));
+        console.log(error.message);
+      });
+  };
+}
+
+export function getPlayersOfTeam(id, isOwnTeam) {
+  return (dispatch) => {
+
+    const config = {
+      params: {
+        club_id: (isOwnTeam) ? localStorage.getItem('myClubId') : id
+    }
+    };
+
+    axios.get(`${ROOT_URL}/players`, config)
+      .then((response) => {
+        console.log("getting club players: "+JSON.stringify(response));
+
+        dispatch({ type: isOwnTeam? ActionTypes.GET_OWN_TEAM_PLAYERS: 
+          ActionTypes.GET_TEAM_PLAYERS, 
           payload: response.data });
 
       })
@@ -96,6 +114,23 @@ export function getPackages() {
   };
 }
 
+//will get the pending packages of the manager's team
+export function getPackage(id) {
+  return (dispatch) => {
+
+    axios.get(`${ROOT_URL}/trade/${id}`)
+      .then((response) => {
+        console.log("getting packages: "+JSON.stringify(response));
+        dispatch({ type: ActionTypes.GET_PACKAGES, payload: response.data });
+
+      })
+      .catch((error) => {
+        console.log("get packages failed: "+ JSON.stringify(error));
+        console.log(error.message);
+      });
+  };
+}
+
 export function login(param) {
   return (dispatch) => {
     const data = {
@@ -107,6 +142,9 @@ export function login(param) {
       .then((response) => {
         //verify the token
         localStorage.setItem('token', response.data.response);
+        localStorage.setItem('myClubId', response.data.clubId);
+
+        axios.defaults.headers.common['Authorization'] = 'JWT ' + response.data.response
         dispatch({ type: ActionTypes.MANAGER_SIGNIN, payload: {
           clubId: response.data.clubId,
           signinStatus: 'success'} });
@@ -122,7 +160,27 @@ export function logout(){
   localStorage.clear();
 }
 
+export function searchPlayers(param) {
+  return (dispatch) => {
 
+    let config = {
+      params: {
+        search_terms: param.search_terms
+      },
+}
+
+    axios.get(`${ROOT_URL}/search_player`, config)
+      .then((response) => {
+        console.log("search player result: "+JSON.stringify(response));
+        dispatch({ type: ActionTypes.SEARCH_PLAYERS, payload: response.data });
+
+      })
+      .catch((error) => {
+        console.log("get packages failed: "+ JSON.stringify(error));
+        console.log(error.message);
+      });
+  };
+}
 
 
 

@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { getPlayer } from './actions';
+import { getPlayer, getTeam } from './actions';
 import { connect } from 'react-redux';
 
 const styles = {
@@ -36,10 +36,7 @@ class Profile extends Component{
         this.state = {
 
       }
-      // this.props.getPlayer({
-      //   FirstName: 'Jan',
-      //   LastName: 'Oblak'
-      // });
+      // this.props.getPlayer(id);
     }
 
   render(){
@@ -127,16 +124,19 @@ class Profile extends Component{
 
 function mapReduxStateToProps(reduxState) {
   return {
-    // user: reduxState.user,
+    // clubById: reduxState.global.clubById,
+    // playerById: reduxState.global.playerById,
   };
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getPlayer: (param) => {
-      dispatch(getPlayer(param));
+    getPlayer: (id) => {
+      dispatch(getPlayer(id));
     },
-
+    getTeam: (id, own) => {
+      dispatch(getTeam(id, own));
+    },
   };
 };
 

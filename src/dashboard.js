@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { getPackages } from './actions';
+import { getPackages, getTeam, getPackage } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -266,6 +266,7 @@ class Dashboard extends Component{
     };
 
     this.props.getPackages();
+    this.props.getTeam(this.props.myClubId, true);
   }
 
 
@@ -331,7 +332,7 @@ render(){
       <Box style={{width: '60%', margin: 30}}>
         <Typography component="h1" style={{marginBottom: 20}}
         variant="h5" align="center" color="textPrimary" gutterBottom>
-          My Team
+          {this.props.myClub ? this.props.myClub.ClubName: 'My Team'}
         </Typography>
         
           <MaterialTable
@@ -422,6 +423,7 @@ function mapReduxStateToProps(reduxState) {
   return {
     pending_packages: reduxState.global.pending_packages,
     myClub: reduxState.global.myClub,
+    myClubId: reduxState.global.myClubId,
   };
 }
 
@@ -430,7 +432,12 @@ const mapDispatchToProps = (dispatch) => {
     getPackages: () => {
       dispatch(getPackages());
     },
-
+    getPackage: (id) => {
+      dispatch(getPackage(id));
+    },
+    getTeam: (id, own) => {
+      dispatch(getTeam(id, own));
+    },
   };
 };
 
