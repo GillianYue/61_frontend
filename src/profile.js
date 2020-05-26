@@ -36,7 +36,10 @@ class Profile extends Component{
         this.state = {
 
       }
-      this.props.getPlayer();
+      // this.props.getPlayer({
+      //   FirstName: 'Jan',
+      //   LastName: 'Oblak'
+      // });
     }
 
   render(){

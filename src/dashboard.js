@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { } from './actions';
+import { getPackages } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -162,7 +162,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 0
+    borderWidth: 0,
+    outline: 0
   },
   paper: {
     backgroundColor: '#eeeeee',
@@ -264,6 +265,7 @@ class Dashboard extends Component{
       modalOpen: false,
     };
 
+    this.props.getPackages();
   }
 
 
@@ -297,7 +299,7 @@ class Dashboard extends Component{
           timeout: 500,
         }}
       >
-        <Fade in={this.state.modalOpen}>
+        <Fade in={this.state.modalOpen} style={{outline: 0}}>
           <div style={styles.paper}>
             <div>Requests in this package: </div>
               <div style={{backgroundColor: '#8c94a1', width: '85%', height: '40%',
@@ -418,15 +420,16 @@ onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
 
 function mapReduxStateToProps(reduxState) {
   return {
-    // user: reduxState.user,
+    pending_packages: reduxState.global.pending_packages,
+    myClub: reduxState.global.myClub,
   };
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    // createPaySess: (param) => {
-    //   dispatch(createPaySess(param));
-    // },
+    getPackages: () => {
+      dispatch(getPackages());
+    },
 
   };
 };

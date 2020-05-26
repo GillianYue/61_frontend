@@ -16,7 +16,7 @@ function App() {
 
       <div>
         <Switch>
-          <Route path="/signin" render={(props)=><SignIn {...props} />} />
+          <Route path="/signin" render={(props)=> <SignIn {...props} />} />
           <PrivateRoute path="/search" />
           <PrivateRoute path="/profile" />
           <PrivateRoute path="/" />
