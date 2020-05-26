@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { } from './actions';
 
@@ -11,12 +11,10 @@ import Fade from '@material-ui/core/Fade';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
-import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
-import Paper from '@material-ui/core/Paper';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridList from '@material-ui/core/GridList';
 import MaterialTable from "material-table";
@@ -207,7 +205,7 @@ class PendingPackage extends Component{
             <Typography variant="body1" color="textSecondary">
                 requested: 
               </Typography>
-              <Typography component="body2" variant="body1" color="textPrimary">
+              <Typography variant="body1" color="textPrimary">
                 {' '+tier.player}
               </Typography>
   
@@ -229,7 +227,7 @@ class PendingPackage extends Component{
             </Button>
             <Button fullWidth variant='outlined' color="primary"
             style={{height: 35, alignItems: 'center', justifyContent: 'center'}}>
-                <Typography variant="display1">
+                <Typography variant="button">
               {tier.buttonText2}
               </Typography>
             </Button>
@@ -270,7 +268,7 @@ class Dashboard extends Component{
 
 
   componentDidUpdate(prevProps){
-    if(this.props.orderById !== null && prevProps.orderById != this.props.orderById) {
+    if(this.props.orderById !== null && prevProps.orderById !== this.props.orderById) {
 
     }
   }
@@ -380,7 +378,7 @@ render(){
         /></Box>
 
 <Box style={{ padding: 50, width: '35%', height: '70%',
-borderRadius: 10}} className={styles.paper}>
+borderRadius: 10}}>
 <IconButton color="primary" aria-label="upload picture" component="span"
 onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
     <AddIcon />
@@ -389,7 +387,7 @@ onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
       <GridList 
           cellHeight={200} spacing={1} 
           style={styles.gl}>
-            {tiers.map((tier) => <PendingPackage tier={tier} 
+            {tiers.map((tier) => <PendingPackage tier={tier} key={tier.title}
             click={() => this.setState({ modalOpen: true, packageShown: tier, 
               packageReadOnly: true })}
             />)}
@@ -405,11 +403,6 @@ onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
 
       </Container>
       {/* End hero unit */}
-      <Container maxWidth="md" component="main">
-     
-
-      </Container>
-      {/* Footer */}
 
         <Box mt={5}>
           <Copyright />

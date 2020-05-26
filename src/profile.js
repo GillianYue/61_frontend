@@ -1,75 +1,56 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { Component } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { getPlayer } from './actions';
+import { connect } from 'react-redux';
 
-function Copyright() {
-    return (
-      <Typography variant="body2" color="textSecondary" align="center" >
-          Database CS61 Team 6
-      </Typography>
-    );
-  }
-
-const useStyles = makeStyles((theme) => ({
-  appBar: {
-    position: 'relative',
-  },
+const styles = {
   layout: {
-    width: 'auto',
-    marginLeft: theme.spacing(2),
-    marginRight: theme.spacing(2),
-    [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
-      width: 600,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    },
+    width: '100%',
+    marginLeft: 16,
+    marginRight: 16,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 30,
+    
   },
   paper: {
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(3),
-    padding: theme.spacing(2),
-    [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
-      marginTop: theme.spacing(6),
-      marginBottom: theme.spacing(6),
-      padding: theme.spacing(3),
-    },
+    marginTop: 24,
+    marginBottom: 24,
+    margin: 'auto',
+    padding: 30,
+    width: '60%',
+    alignSelf: 'center',
   },
-  stepper: {
-    padding: theme.spacing(3, 0, 5),
-  },
-  buttons: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
-  button: {
-    marginTop: theme.spacing(3),
-    marginLeft: theme.spacing(1),
-  },
-}));
+};
 
 
-export default function Profile() {
-  const classes = useStyles();
+class Profile extends Component{
+      constructor(props) {
+        super(props);
+        this.state = {
 
+      }
+      this.props.getPlayer();
+    }
+
+  render(){
   return (
     <React.Fragment>
 
-      <main className={classes.layout}>
-        <Paper className={classes.paper}>
+      <main style={styles.layout}>
+        <Paper style={styles.paper} >
           <Typography component="h1" variant="h4" align="center">
             Player/Team name
           </Typography>
           <React.Fragment>
             {
               <React.Fragment>
- {/* <Typography variant="h6" gutterBottom>
-        (team name if player)
-      </Typography> */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -121,29 +102,7 @@ export default function Profile() {
             autoComplete="billing address-level2"
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField id="state" name="state" label="State/Province/Region" fullWidth />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            required
-            id="zip"
-            name="zip"
-            label="Zip / Postal code"
-            fullWidth
-            autoComplete="billing postal-code"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            required
-            id="country"
-            name="country"
-            label="Country"
-            fullWidth
-            autoComplete="billing country"
-          />
-        </Grid>
+
         <Grid item xs={12}>
           <FormControlLabel
             control={<Checkbox color="secondary" name="saveAddress" value="yes" />}
@@ -159,5 +118,32 @@ export default function Profile() {
         <Copyright />
       </main>
     </React.Fragment>
+  );
+          }
+}
+
+function mapReduxStateToProps(reduxState) {
+  return {
+    // user: reduxState.user,
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getPlayer: (param) => {
+      dispatch(getPlayer(param));
+    },
+
+  };
+};
+
+export default connect(mapReduxStateToProps, mapDispatchToProps)(Profile);
+
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center"
+    style={{marginTop: 30}} >
+        Database CS61 Team 6
+    </Typography>
   );
 }

@@ -10,6 +10,8 @@ import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import { logout } from '../actions/index';
+import { withRouter } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -28,12 +30,18 @@ const useStyles = makeStyles((theme) => ({
   toolbarTitle: {
     flexGrow: 1,
   },
-  link: {
-    margin: theme.spacing(1, 1.5),
-  },
   }
 ));
 
+const LogoutButton = withRouter(({ history }) => (
+  <Button href="#" color="primary" variant="outlined" 
+  style={{margin: 12}} onClick={()=>{ 
+    logout();
+    history.push('/signin')
+     }}>
+    Logout
+  </Button>
+));
 
 export default function TopBar() {
     const classes = useStyles();
@@ -77,9 +85,7 @@ export default function TopBar() {
                     username
                   </Link>
                 </Grid>
-                <Button href="#" color="primary" variant="outlined" className={classes.link}>
-                  Logout
-                </Button>
+              <LogoutButton/>
               </Toolbar>
             </AppBar>
             </div>

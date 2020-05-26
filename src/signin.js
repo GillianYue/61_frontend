@@ -1,97 +1,108 @@
-import React from 'react';
+import { connect } from 'react-redux';
+import React, { Component } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { login } from './actions/index';
+import {
+  withRouter
+} from 'react-router-dom'
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
-const useStyles = makeStyles((theme) => ({
+const styles = {
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: 64,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
   avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    margin: 8,
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
+    marginTop: 8,
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    margin: 18,
+    marginLeft: 0,
   },
-}));
+};
 
-export default function SignIn() {
-  const classes = useStyles();
 
+class SignIn extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: '',
+      password: ''
+  }
+
+}
+
+componentDidUpdate(prevProps){
+  if(this.props.signin_success !== prevProps.signin_success && 
+    this.props.signin_success === 'success') {
+      this.props.history.push('/')
+  }
+}
+
+render(){
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
+      <div style={styles.paper}>
+        <Avatar style={styles.avatar}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} noValidate>
+        <form style={styles.form} noValidate>
           <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                value={this.state.username}
+                onChange={(event)=>{
+                  this.setState({username: event.target.value})}}
+                autoFocus
+                autoComplete="username"
           />
           <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={this.state.password}
+                onChange={(event)=>{
+                this.setState({password: event.target.value})}}
           />
           <Button
-            type="submit"
             fullWidth
             variant="contained"
             color="primary"
-            className={classes.submit}
+            style={styles.submit}
+            onClick={() => { 
+
+              const data={
+                username: this.state.username,
+                password: this.state.password
+              }
+              this.props.login(data) }}
           >
             Sign In
           </Button>
@@ -102,3 +113,21 @@ export default function SignIn() {
     </Container>
   );
 }
+}
+
+function mapReduxStateToProps(reduxState) {
+  return {
+    signin_success: reduxState.global.signin_success,
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    login: (param) => {
+      dispatch(login(param));
+    },
+
+  };
+};
+
+export default withRouter(connect(mapReduxStateToProps, mapDispatchToProps)(SignIn));
