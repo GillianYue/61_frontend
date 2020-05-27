@@ -14,6 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { withRouter } from 'react-router-dom';
 
 import { logout } from '../actions/index';
+import { searchPlayers, searchTeams } from '../actions/index';
 
 const styles = {
   '@global': {
@@ -72,13 +73,20 @@ render(){
           onChange={(t) => this.setState({searchText: t})}
           onRequestSearch={() => 
           {
+            (this.state.dropDown === 1) ?
+            this.props.searchPlayers({
+              search_terms: this.state.searchText,
+          }): this.props.searchTeams({
+            search_terms: this.state.searchText,
+          });
+
             this.props.history.push({
               pathname: '/search',
               state: { search_terms: this.state.searchText,
               searchFor: (this.state.dropDown === 1) ?
             'players':'clubs' }
             })
-          }}//TODO
+          }}
           value={this.state.searchText}
           style={{
             margin: '0 auto',
@@ -121,7 +129,12 @@ render(){
   
   const mapDispatchToProps = (dispatch) => {
     return {
-
+      searchPlayers: (param) => {
+        dispatch(searchPlayers(param));
+      },
+      searchTeams: (param) => {
+        dispatch(searchTeams(param));
+      },
     };
   };
   

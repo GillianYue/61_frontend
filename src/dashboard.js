@@ -330,15 +330,15 @@ render(){
       className={styles.heroContent}>
         <Grid container direction="row" style={{justifyContent: 'space-around',}}>
       <Box style={{width: '60%', margin: 30}}>
-        <Typography component="h1" style={{marginBottom: 20}}
-        variant="h5" align="center" color="textPrimary" gutterBottom>
-          {this.props.myClub ? this.props.myClub.ClubName: 'My Team'}
+        <Typography component="h1" style={{marginBottom: 10}}
+        variant="h6" align="center" color="textPrimary" gutterBottom>
+         {'Manage my Players'}
         </Typography>
         
           <MaterialTable
               columns={this.state.columns}
               data={this.state.data}
-          title="Team Name"
+          title= {this.props.myClub ? this.props.myClub.ClubName: 'My Team'}
           icons={tableIcons}
 
           editable={{

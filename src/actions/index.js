@@ -171,18 +171,36 @@ export function searchPlayers(param) {
 
     axios.get(`${ROOT_URL}/search_player`, config)
       .then((response) => {
-        console.log("search player result: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.SEARCH_PLAYERS, payload: response.data });
 
       })
       .catch((error) => {
-        console.log("get packages failed: "+ JSON.stringify(error));
+        console.log("search players failed: "+ JSON.stringify(error));
         console.log(error.message);
       });
   };
 }
 
+export function searchTeams(param) {
+  return (dispatch) => {
 
+    let config = {
+      params: {
+        search_terms: param.search_terms
+      },
+}
+
+    axios.get(`${ROOT_URL}/search_club`, config)
+      .then((response) => {
+        dispatch({ type: ActionTypes.SEARCH_TEAMS, payload: response.data });
+
+      })
+      .catch((error) => {
+        console.log("search teams failed: "+ JSON.stringify(error));
+        console.log(error.message);
+      });
+  };
+}
 
 
 
