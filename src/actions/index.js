@@ -42,7 +42,7 @@ export function getPlayer(id) {
 
     axios.get(`${ROOT_URL}/players/${id}`)
       .then((response) => {
-        console.log("getting player: "+JSON.stringify(response));
+        // console.log("getting player: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.GET_PLAYER, payload: response.data });
 
       })
@@ -59,8 +59,7 @@ export function getTeam(id, isOwnTeam) {
     const teamID = (isOwnTeam) ? localStorage.getItem('myClubId') : id;
     axios.get(`${ROOT_URL}/clubs/${teamID}`)
       .then((response) => {
-        console.log("getting club: "+JSON.stringify(response));
-
+        // console.log("getting club: "+JSON.stringify(response));
         dispatch({ type: isOwnTeam? ActionTypes.GET_OWN_TEAM: ActionTypes.GET_TEAM, 
           payload: response.data });
 
@@ -83,7 +82,7 @@ export function getPlayersOfTeam(id, isOwnTeam) {
 
     axios.get(`${ROOT_URL}/players`, config)
       .then((response) => {
-        console.log("getting club players: "+JSON.stringify(response));
+        // console.log("getting club players: "+JSON.stringify(response));
 
         dispatch({ type: isOwnTeam? ActionTypes.GET_OWN_TEAM_PLAYERS: 
           ActionTypes.GET_TEAM_PLAYERS, 
@@ -103,7 +102,7 @@ export function getPackages() {
 
     axios.get(`${ROOT_URL}/trade`)
       .then((response) => {
-        console.log("getting packages: "+JSON.stringify(response));
+        // console.log("getting packages: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.GET_PACKAGES, payload: response.data });
 
       })
@@ -120,7 +119,7 @@ export function getPackage(id) {
 
     axios.get(`${ROOT_URL}/trade/${id}`)
       .then((response) => {
-        console.log("getting packages: "+JSON.stringify(response));
+        // console.log("getting package: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.GET_PACKAGES, payload: response.data });
 
       })

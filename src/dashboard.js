@@ -276,6 +276,7 @@ class Dashboard extends Component{
       dropdown_search: 1,
       search_text: '',
 
+      searchResults: [],
     };
 
     this.props.getPackages();
@@ -289,6 +290,14 @@ class Dashboard extends Component{
       prevProps.myClubPlayers !== this.props.myClubPlayers) {
         this.setState({data: this.props.myClubPlayers})
     }
+    if(this.state.dropdown_search === 1 && 
+      this.props.playersSearch !== prevProps.playersSearch){
+        this.setState({searchResults: this.props.playersSearch});
+      }
+    else if(this.state.dropdown_search === 2 && 
+      this.props.clubsSearch !== prevProps.clubsSearch){
+          this.setState({searchResults: this.props.clubsSearch});
+        }
   }
 
   handleOpen = () => {
@@ -394,20 +403,42 @@ justifyContent: 'center', alignItems: 'center', paddingTop: 20}}>
   alignItems="center">     
   <TextField label="Search" style={{marginBottom: 10}}
   id="standard-size-small" value={this.state.search_text}
-  size="small" onChange={(event)=>{this.setState({search_text: event.target.value})}}/>
+  size="small" onChange={(event)=>{
+    this.setState({search_text: event.target.value});
+if(event.target.value !== ''){
+  this.state.dropdown_search === 1? 
+  this.props.searchPlayers({search_terms: event.target.value}):
+  this.props.searchTeams({search_terms: event.target.value});
+}else{
+  this.setState({searchResults: []})
+}
+  }
+    }/>
     <Select
           labelId="demo-simple-select-required-label"
           id="demo-simple-select-required"
           value={this.state.dropdown_search}
-          onChange={(event)=>{this.setState({dropDown: event.target.value})}}
-          // style={{marginRight: 50}}
+          onChange={(event)=>{
+            this.setState({
+              search_text: '',
+              searchResults: [],
+              dropdown_search: event.target.value})}}
         ><MenuItem value={1}>Player</MenuItem>
         <MenuItem value={2}>Team</MenuItem>
       </Select></Grid>
 
 <Box style={{backgroundColor: '#aeb1d8', width: '90%', height: '90%',
 borderRadius: 5, opacity: 0.4}}>
+  {console.log("displaying search: "+JSON.stringify(this.state.searchResults))}
+  {this.state.searchResults.length > 0 ? 
+      this.state.searchResults.map((res)=>{
+        const t = this.state.dropdown_search;
+        return <Grid key={t===1? res.PlayerID : res.ClubID}
+        container={true} direction="row" justify="space-around" >
+          {t===1? <p>{`${res.FirstName} ${res.LastName}`}</p> : <p>{res.ClubName}</p>}
 
+        </Grid>
+      }) : null}
 
 </Box>
 </Box>
@@ -530,6 +561,8 @@ function mapReduxStateToProps(reduxState) {
     myClub: reduxState.global.myClub,
     myClubId: reduxState.global.myClubId,
     myClubPlayers: reduxState.global.myClubPlayers,
+    playersSearch: reduxState.global.playersSearch,
+    clubsSearch: reduxState.global.clubsSearch,
   };
 }
 
