@@ -202,9 +202,23 @@ export function searchTeams(param) {
   };
 }
 
+export function createPackage(requests) {
+  return (dispatch) => {
+    const body = {
+      requests: requests,
+      //maybe something else
+    }
+    axios.post(`${ROOT_URL}/trade`, body)
+      .then((response) => {
+        dispatch({ type: ActionTypes.CREATE_Package, payload: response.data });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
+}
 
-
-
+//////////
 export function createOrder(order) {
     return (dispatch) => {
       axios.post(`${ROOT_URL}/order`, order)

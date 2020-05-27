@@ -25,7 +25,7 @@ const globalReducer = (state = initialState, action) => {
         return Object.assign({}, state, {
          playerById: action.payload.response[0],
 });
-      case ActionTypes.MANAGER_SIGNIN:
+      case ActionTypes.MANAGER_SIGNIN: //
         return Object.assign({}, state, {
         signin_success: action.payload.signinStatus,
         myClubId: action.payload.clubId,
@@ -41,10 +41,9 @@ const globalReducer = (state = initialState, action) => {
       });
       case ActionTypes.GET_OWN_TEAM_PLAYERS:
               return Object.assign({}, state, {
-              myClubPlayers: action.payload.response,
+                myClubPlayers: action.payload.response,
       });
-      case ActionTypes.GET_TEAM_PLAYERS:
-        console.log("players got: "+JSON.stringify(action.payload.response))
+      case ActionTypes.GET_TEAM_PLAYERS: //
         return Object.assign({}, state, {
           clubByIdPlayers: action.payload.response,
   });
@@ -52,11 +51,11 @@ const globalReducer = (state = initialState, action) => {
         return Object.assign({}, state, {
         pending_packages: action.payload,
     });
-    case ActionTypes.SEARCH_PLAYERS:
+    case ActionTypes.SEARCH_PLAYERS: //
       return Object.assign({}, state, {
       playersSearch: action.payload.response,
   });
-    case ActionTypes.SEARCH_TEAMS:
+    case ActionTypes.SEARCH_TEAMS: //
       return Object.assign({}, state, {
       clubsSearch: action.payload.response,
   });

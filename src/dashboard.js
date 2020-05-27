@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { getPackages, getTeam, getPackage } from './actions';
+import { getPackages, getTeam, getPackage, getPlayersOfTeam,
+searchPlayers, searchTeams } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -40,6 +41,8 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 //
 
 import { FaPlusSquare as AddIcon } from 'react-icons/fa';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 function Copyright() {
   return (
@@ -190,7 +193,8 @@ class PendingPackage extends Component{
   render(){
     const tier = this.props.tier;
   return (              
-    <GridListTile key={tier.title} cols={2} rows={1}>
+    <GridListTile style={{width: '100%'}}
+    key={tier.title} cols={2} rows={1}>
 
     <Card style={{ width: '90%', alignSelf: 'center', margin: 10, opacity: this.state.opacity}}
     onMouseEnter={() => this.setState({opacity: 0.6})}
@@ -246,33 +250,44 @@ class Dashboard extends Component{
   constructor(props) {
     super(props);
     this.state = {
-      packageShown: {},
-      packageReadOnly: true,
+
+      // material table stuff
       columns: [
-          { title: "First", field: "name" },
-          { title: "Last", field: "surname" },
-          { title: "Age", field: "age", type: "numeric" },
-          {
-            title: "Salary",
-            field: "salary",
-            type: "numeric"
-          }
+          { title: "First", field: "FirstName" },
+          { title: "Last", field: "LastName" },
+          { title: "Age", field: "Age", type: "numeric" },
+          { title: "Salary", field: "Salary", type: "numeric"},
+          { title: "PlayerID", field: "PlayerID", type: "numeric"},
         ],
-      data: [
-          { name: "Test", surname: "Player", age: 32, salary: 33 },
-          { name: "Some", surname: "Person", age: 27, salary: 2000 }
-        ],
+      data: this.props.myClubPlayers || [],
+
+      // modal stuff
       modalOpen: false,
+      packageShown: {},
+      packageReadOnly: true, //false == creating package
+
+      tempRequests: [],
+      tf_fee: '',
+      tf_salary: '',
+      tf_from: '',
+      tf_to: '',
+      tf_player: '',
+      request_type: 1,
+      dropdown_search: 1,
+      search_text: '',
+
     };
 
     this.props.getPackages();
     this.props.getTeam(this.props.myClubId, true);
+    this.props.getPlayersOfTeam(this.props.myClubId, true);
   }
 
 
   componentDidUpdate(prevProps){
-    if(this.props.orderById !== null && prevProps.orderById !== this.props.orderById) {
-
+    if(this.props.myClubPlayers !== null && 
+      prevProps.myClubPlayers !== this.props.myClubPlayers) {
+        this.setState({data: this.props.myClubPlayers})
     }
   }
 
@@ -309,11 +324,96 @@ class Dashboard extends Component{
               </div>
 
 
-      <form noValidate autoComplete="off">
-          <TextField id="standard-basic" label="Standard" />
-          <TextField id="filled-basic" label="Filled" variant="filled" />
-          <TextField id="outlined-basic" label="Outlined" variant="outlined" />
-</form>
+      {/* <form noValidate autoComplete="off"> */}
+      <Grid container={true} direction="row" justify="space-between">
+
+          <Box style={{width: '50%'}}>
+          <Grid container={true} direction="row" justify="space-between"
+      style={{marginTop: 10}}>
+      <Grid item xs={10} sm={5}>
+          <TextField InputProps={{ readOnly: true }}
+          label="From" value={this.state.tf_from} fullWidth />
+          </Grid> <Grid item xs={10} sm={5}>
+          <TextField InputProps={{ readOnly: true }}
+          label="To" value={this.state.tf_to} fullWidth />
+</Grid></Grid>
+
+<Grid container={true} direction="row" justify="space-between"
+   alignItems="center"   style={{marginTop: 10}}>
+<Grid item xs={10} sm={5}>
+<TextField InputProps={{ readOnly: true }}
+          label="Player Involved" value={this.state.tf_player} fullWidth />
+          </Grid><Grid item xs={10} sm={5}>
+    <Select labelId="demo-simple-select-required-label"
+    label="request type"
+          id="demo-simple-select-required"
+          value={this.state.request_type}
+          onChange={(event)=>{this.setState({request_type: event.target.value})}}
+          style={{marginTop: 10}}
+        ><MenuItem value={1}>Buy</MenuItem>
+        <MenuItem value={2}>Sell</MenuItem>
+      </Select></Grid>
+      </Grid>
+
+      <Grid container={true} direction="row" justify="space-between"
+      style={{marginTop: 10}}>
+      <Grid item xs={10} sm={5}>
+          {isNaN(this.state.tf_fee) ? <TextField error 
+          label="Transfer Fee" helperText="Please enter a numerical value."
+          onChange={(event)=>{this.setState({tf_fee: event.target.value})}}
+          value={this.state.tf_fee} fullWidth />: 
+          <TextField label="Transfer Fee" 
+          onChange={(event)=>{this.setState({tf_fee: event.target.value})}}
+          value={this.state.tf_fee} fullWidth />}
+          </Grid>
+          <Grid item xs={10} sm={5}>
+          {isNaN(this.state.tf_salary) ? <TextField error 
+          label="New Salary" helperText="Please enter a numerical value."
+          onChange={(event)=>{this.setState({tf_salary: event.target.value})}}
+          value={this.state.tf_salary} fullWidth />: 
+          <TextField label="New Salary" 
+          onChange={(event)=>{this.setState({tf_salary: event.target.value})}}
+          value={this.state.tf_salary} fullWidth />}
+</Grid>
+    </Grid>
+
+    <Button fullWidth variant='contained' color="primary" 
+    onClick={()=>{ }} ///////
+            style={{height: 35, alignItems: 'center', justifyContent: 'center',
+            width: "70%", marginTop: 40, marginLeft: 20}}>
+              <Typography variant="button">
+              {"Add Request to Package"}
+              </Typography>
+            </Button>
+            </Box>
+
+<Box align="center" style={{ width: '50%',
+justifyContent: 'center', alignItems: 'center', paddingTop: 20}}>
+
+  <Grid container={true} direction="row" justify="space-around" 
+  alignItems="center">     
+  <TextField label="Search" style={{marginBottom: 10}}
+  id="standard-size-small" value={this.state.search_text}
+  size="small" onChange={(event)=>{this.setState({search_text: event.target.value})}}/>
+    <Select
+          labelId="demo-simple-select-required-label"
+          id="demo-simple-select-required"
+          value={this.state.dropdown_search}
+          onChange={(event)=>{this.setState({dropDown: event.target.value})}}
+          // style={{marginRight: 50}}
+        ><MenuItem value={1}>Player</MenuItem>
+        <MenuItem value={2}>Team</MenuItem>
+      </Select></Grid>
+
+<Box style={{backgroundColor: '#aeb1d8', width: '90%', height: '90%',
+borderRadius: 5, opacity: 0.4}}>
+
+
+</Box>
+</Box>
+          </Grid>
+
+{/* </form> */}
           </div>
         </Fade>
       </Modal>
@@ -330,8 +430,8 @@ render(){
       className={styles.heroContent}>
         <Grid container direction="row" style={{justifyContent: 'space-around',}}>
       <Box style={{width: '60%', margin: 30}}>
-        <Typography component="h1" style={{marginBottom: 10}}
-        variant="h6" align="center" color="textPrimary" gutterBottom>
+        <Typography style={{marginBottom: 5}}
+        variant="body1" align="center" color="textPrimary" gutterBottom>
          {'Manage my Players'}
         </Typography>
         
@@ -382,10 +482,13 @@ render(){
 
 <Box style={{ padding: 50, width: '35%', height: '70%',
 borderRadius: 10}}>
-<IconButton color="primary" aria-label="upload picture" component="span"
-onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
-    <AddIcon />
-</IconButton>
+
+  <IconButton color="primary" aria-label="upload picture" component="span"
+  style={{position: 'absolute', zIndex: 2,
+  margin: 0, padding: 0, width: 30, height: 30}}
+  onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
+      <AddIcon style={{width: '100%', height: '100%'}}/>
+  </IconButton>
 
       <GridList 
           cellHeight={200} spacing={1} 
@@ -395,6 +498,8 @@ onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
               packageReadOnly: true })}
             />)}
 </GridList> 
+
+
 </Box>
 </Grid>
 
@@ -424,6 +529,7 @@ function mapReduxStateToProps(reduxState) {
     pending_packages: reduxState.global.pending_packages,
     myClub: reduxState.global.myClub,
     myClubId: reduxState.global.myClubId,
+    myClubPlayers: reduxState.global.myClubPlayers,
   };
 }
 
@@ -438,6 +544,15 @@ const mapDispatchToProps = (dispatch) => {
     getTeam: (id, own) => {
       dispatch(getTeam(id, own));
     },
+    getPlayersOfTeam: (id, own) => {
+      dispatch(getPlayersOfTeam(id, own));
+    },
+    searchPlayers: (term) => {
+      dispatch(searchPlayers(term));
+    },
+    searchTeams: (term) => {
+      dispatch(searchTeams(term));
+    }
   };
 };
 
