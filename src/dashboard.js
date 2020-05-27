@@ -263,15 +263,18 @@ class Dashboard extends Component{
 
       // modal stuff
       modalOpen: false,
-      packageShown: {},
+      packageShown: {}, //pending packages for the team
       packageReadOnly: true, //false == creating package
 
-      tempRequests: [],
-      tf_fee: '',
-      tf_salary: '',
+      tempRequests: [], //listed in package modal
+      tf_fee: 0,
+      tf_salary: 0,
       tf_from: '',
+      from_id: null,
       tf_to: '',
+      to_id: null,
       tf_player: '',
+      player_id: null,
       request_type: 1,
       dropdown_search: 1,
       search_text: '',
@@ -282,6 +285,8 @@ class Dashboard extends Component{
     this.props.getPackages();
     this.props.getTeam(this.props.myClubId, true);
     this.props.getPlayersOfTeam(this.props.myClubId, true);
+
+    this.registerResult = this.registerResult.bind(this);
   }
 
 
@@ -298,6 +303,10 @@ class Dashboard extends Component{
       this.props.clubsSearch !== prevProps.clubsSearch){
           this.setState({searchResults: this.props.clubsSearch});
         }
+    if(this.props.clubById !== null && 
+      prevProps.clubById !== this.props.clubById){
+        this.setState({tf_from: this.props.clubById.ClubName});
+      }
   }
 
   handleOpen = () => {
@@ -307,6 +316,16 @@ class Dashboard extends Component{
   handleClose = () => {
     this.setState({modalOpen: false});
   };
+
+  deleteRequest = (index) =>{
+    console.log("trying to delete "+index+" from the array"+
+    JSON.stringify(this.state.tempRequests));
+    var arr = this.state.tempRequests;
+    arr.splice(index, 1);
+    this.setState({tempRequests: arr});
+    console.log("newly deleted requests: "+JSON.stringify(arr));
+
+  }
 
   packageDetail (pkg, readOnly){
 
@@ -328,12 +347,13 @@ class Dashboard extends Component{
           <div style={styles.paper}>
             <div>Requests in this package: </div>
               <div style={{backgroundColor: '#8c94a1', width: '85%', height: '40%',
-            opacity: 0.1, borderRadius: 5, alignSelf: 'center'}}>
-                
+            opacity: 0.1, borderRadius: 5, alignSelf: 'center', paddingTop: 20}}>
+                {this.state.tempRequests.map((req, i)=>{
+                  return <TempRequest key={i} request={req} index={i}
+                  deleteRequest={this.deleteRequest} />
+                })}
               </div>
 
-
-      {/* <form noValidate autoComplete="off"> */}
       <Grid container={true} direction="row" justify="space-between">
 
           <Box style={{width: '50%'}}>
@@ -352,16 +372,7 @@ class Dashboard extends Component{
 <Grid item xs={10} sm={5}>
 <TextField InputProps={{ readOnly: true }}
           label="Player Involved" value={this.state.tf_player} fullWidth />
-          </Grid><Grid item xs={10} sm={5}>
-    <Select labelId="demo-simple-select-required-label"
-    label="request type"
-          id="demo-simple-select-required"
-          value={this.state.request_type}
-          onChange={(event)=>{this.setState({request_type: event.target.value})}}
-          style={{marginTop: 10}}
-        ><MenuItem value={1}>Buy</MenuItem>
-        <MenuItem value={2}>Sell</MenuItem>
-      </Select></Grid>
+          </Grid>
       </Grid>
 
       <Grid container={true} direction="row" justify="space-between"
@@ -387,13 +398,34 @@ class Dashboard extends Component{
     </Grid>
 
     <Button fullWidth variant='contained' color="primary" 
-    onClick={()=>{ }} ///////
+    onClick={()=>{
+      var joined = this.state.tempRequests.concat({
+        from: this.state.from_id,
+        fromName: this.state.tf_from,
+        to: this.state.to_id,
+        toName: this.state.tf_to,
+        playerId: this.state.player_id,
+        playerName: this.state.tf_player,
+        transfer_fee: this.state.tf_fee,
+        salary: this.state.tf_salary,
+        date: Date(),
+      });
+      this.setState({tempRequests: joined});
+     }} ///////
             style={{height: 35, alignItems: 'center', justifyContent: 'center',
             width: "70%", marginTop: 40, marginLeft: 20}}>
               <Typography variant="button">
               {"Add Request to Package"}
               </Typography>
             </Button>
+
+{ (this.state.tf_from && this.state.tf_to && this.state.tf_player) ?
+   <p style={{fontSize: 10}}>club <b>{this.state.tf_from}</b> will buy from club 
+   <b> {this.state.tf_to}</b> player <b>{this.state.tf_player}</b> with a fee of 
+   <b> {this.state.tf_fee}</b>; <b>{this.state.tf_player}</b>'s new salary is 
+   <b> {this.state.tf_salary}</b></p>
+: null}
+
             </Box>
 
 <Box align="center" style={{ width: '50%',
@@ -427,15 +459,15 @@ if(event.target.value !== ''){
         <MenuItem value={2}>Team</MenuItem>
       </Select></Grid>
 
-<Box style={{backgroundColor: '#aeb1d8', width: '90%', height: '90%',
-borderRadius: 5, opacity: 0.4}}>
-  {console.log("displaying search: "+JSON.stringify(this.state.searchResults))}
+<Box style={{backgroundColor: '#aeb1d8', width: '90%', height: 200,
+borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
   {this.state.searchResults.length > 0 ? 
       this.state.searchResults.map((res)=>{
         const t = this.state.dropdown_search;
         return <Grid key={t===1? res.PlayerID : res.ClubID}
         container={true} direction="row" justify="space-around" >
-          {t===1? <p>{`${res.FirstName} ${res.LastName}`}</p> : <p>{res.ClubName}</p>}
+          <MiniSearchResult type={t} instance={res} 
+          registerResult={this.registerResult}/>
 
         </Grid>
       }) : null}
@@ -444,11 +476,27 @@ borderRadius: 5, opacity: 0.4}}>
 </Box>
           </Grid>
 
-{/* </form> */}
           </div>
         </Fade>
       </Modal>
     </div>)
+  }
+
+  registerResult(param){
+    const t = param.type;
+    const res = param.instance;
+
+    if(t===1){ //player add
+      this.props.getTeam(res.ClubID, false);
+
+      this.setState({
+      tf_player: `${res.FirstName} ${res.LastName}`,
+      player_id: res.PlayerID,
+      from_id: res.ClubID})
+    }else{ //club
+      this.setState({tf_to: res.ClubName,
+      to_id: res.ClubID});
+    }
   }
 
 render(){
@@ -517,7 +565,8 @@ borderRadius: 10}}>
   <IconButton color="primary" aria-label="upload picture" component="span"
   style={{position: 'absolute', zIndex: 2,
   margin: 0, padding: 0, width: 30, height: 30}}
-  onClick={()=> {this.setState({modalOpen: true, packageReadOnly: false})}}>
+  onClick={()=> {
+    this.setState({modalOpen: true, packageReadOnly: false})}}>
       <AddIcon style={{width: '100%', height: '100%'}}/>
   </IconButton>
 
@@ -541,13 +590,11 @@ borderRadius: 10}}>
 </Box>
 
       </Container>
-      {/* End hero unit */}
 
         <Box mt={5}>
           <Copyright />
         </Box>
 
-      {/* End footer */}
     </React.Fragment>
   );
             }
@@ -563,6 +610,7 @@ function mapReduxStateToProps(reduxState) {
     myClubPlayers: reduxState.global.myClubPlayers,
     playersSearch: reduxState.global.playersSearch,
     clubsSearch: reduxState.global.clubsSearch,
+    clubById: reduxState.global.clubById,
   };
 }
 
@@ -610,3 +658,66 @@ const tableIcons = {
   ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
+
+class MiniSearchResult extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      opacity: 1,
+    }
+  }
+
+  render(){
+    const t = this.props.type;
+    const res = this.props.instance;
+
+    const content = 
+    <p style={{color: 'black', margin: 0, padding: 0, opacity: 1}}>
+      {(t === 1) ? `${res.FirstName} ${res.LastName}`: res.ClubName} </p>
+
+    return (
+      <Box style={{borderRadius: 5, backgroundColor: 'white',
+    opacity: this.state.opacity, padding: 5, width: '80%', margin: 2, height: 'auto'}} 
+    onMouseEnter={() => this.setState({opacity: 0.7})}
+    onMouseLeave={() => this.setState({opacity: 1})}
+    onClick={()=> {this.props.registerResult({
+      type: t,
+      instance: res,
+    })}}>
+      {content}</Box>
+    );
+  }
+
+}
+
+class TempRequest extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      opacity: 1,
+    }
+  }
+
+  render(){
+    const req = this.props.request;
+    const fromName = req.fromName, toName = req.toName,
+    playerName = req.playerName;
+
+  const content =  <p style={{color: 'black', justifyContent: 'center',
+  alignItems: 'center', margin: 0, padding: 0, opacity: 1}}>
+    From: {fromName} To: {toName} Player: {playerName} Fee: {req.transfer_fee} New_Salary: {req.salary}</p>
+
+    return (
+      <Box align="center" style={{ justifyContent: 'center',
+      alignItems: 'center', borderRadius: 5, backgroundColor: 'white',
+    opacity: this.state.opacity, marginLeft: 10, marginRight: 10,
+  padding: 5, height: 'auto'}} 
+    onMouseEnter={() => this.setState({opacity: 0.7})}
+    onMouseLeave={() => this.setState({opacity: 1})}
+    onClick={()=> { this.props.deleteRequest(this.props.index)
+    }}>
+      {content}</Box>
+    );
+  }
+
+}
