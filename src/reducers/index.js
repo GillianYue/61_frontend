@@ -19,9 +19,10 @@ const initialState = {
     clubsSearch: null,
 
     myUsername: null,
-    pkgCreated: null,
 
     requestsFields: null,
+    globalTransfers: null,
+    refetchPackages: false,
  };
 
 const globalReducer = (state = initialState, action) => {
@@ -56,6 +57,7 @@ const globalReducer = (state = initialState, action) => {
       case ActionTypes.GET_PACKAGES:
         return Object.assign({}, state, {
         pending_packages: action.payload.response,
+        refetchPackages: false,
     });
     case ActionTypes.GET_PACKAGE:
       return Object.assign({}, state, {
@@ -72,7 +74,12 @@ const globalReducer = (state = initialState, action) => {
     case ActionTypes.CREATE_PACKAGE: //
     console.log("package create result: "+ JSON.stringify(action.payload))
     return Object.assign({}, state, {
-     pkgCreated: action.payload.response,
+     refetchPackages: true,
+  });
+  case ActionTypes.SIGN_PACKAGE: //
+    return Object.assign({}, state, {
+    refetchPackages: true,
+    refetchPlayers: action.payload.response[3] === 1,
   });
 
     case ActionTypes.EDIT_PLAYER:
@@ -92,9 +99,14 @@ const globalReducer = (state = initialState, action) => {
     return Object.assign({}, state, {
       requestsFields: action.payload,
    });
+
+   case ActionTypes.FETCH_GLOBAL_TRANSFERS:
+    return Object.assign({}, state, {
+      globalTransfers: action.payload.response,
+   });
     default: 
-            return state;
-        }
+     return state;
+   }
 
   };
 

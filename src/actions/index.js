@@ -10,6 +10,7 @@ export const ActionTypes = {
     DELETE_PLAYER: 'DELETE_PLAYER',
 
     CREATE_PACKAGE: 'CREATE_PACKAGE',
+    SIGN_PACKAGE: 'SIGN_PACKAGE',
     GET_PACKAGES: 'GET_PACKAGES',
     GET_PACKAGE: 'GET_PACKAGE',
     GET_TRANSFERS: 'GET_TRANSFERS',
@@ -29,6 +30,7 @@ export const ActionTypes = {
     GET_MY_TRANSFERS: 'GET_MY_TRANSFERS',
 
     FETCH_REQUESTS_FIELDS: 'FETCH_REQUESTS_FIELDS',
+    FETCH_GLOBAL_TRANSFERS: 'FETCH_GLOBAL_TRANSFERS'
   };
 
 
@@ -215,7 +217,7 @@ export function createPackage(requests) {
     console.log("before send: "+JSON.stringify(body))
     axios.post(`${ROOT_URL}/trade`, body)
       .then((response) => {
-        dispatch({ type: ActionTypes.CREATE_Package, payload: response.data });
+        dispatch({ type: ActionTypes.CREATE_PACKAGE, payload: response.data });
       })
       .catch((error) => {
         console.log(error.message);
@@ -233,7 +235,7 @@ export function signPackage(id, accept){
     axios.put(`${ROOT_URL}/sign/${id}`, body)
       .then((response) => {
         console.log("sign package "+id+" result"+ JSON.stringify(response));
-        dispatch({ type: ActionTypes.EDIT_PLAYER, payload: response.data });
+        dispatch({ type: ActionTypes.SIGN_PACKAGE, payload: response.data });
       })
       .catch((error) => {
         console.log(error.message);
@@ -281,6 +283,19 @@ export function deletePlayer(id) {
       .catch((error) => {
         console.log(error.message);
       });
+  }
+}
+
+export function fetchGlobalTransfers(){
+  return (dispatch) => {
+  axios.get(`${ROOT_URL}/transfers`)
+  .then((response) => {
+    dispatch({ type: ActionTypes.FETCH_GLOBAL_TRANSFERS, payload: response.data });
+
+  })
+  .catch((error) => {
+    console.log(error.message);
+  });
   }
 }
 

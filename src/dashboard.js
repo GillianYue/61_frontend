@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getPackages, getTeam, getPackage, getPlayersOfTeam,
 searchPlayers, searchTeams, createPackage, updatePlayer,
-createPlayer, deletePlayer, signPackage, fetchAllRequestsFields } from './actions';
+createPlayer, deletePlayer, signPackage, fetchAllRequestsFields,
+fetchGlobalTransfers } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -182,6 +183,7 @@ class Dashboard extends Component{
 
       // modal stuff
       modalOpen: false,
+      transferModalOpen: false,
       packageShown: {}, //the unpopulated package selected
       packageReadOnly: true, //false == creating package
 
@@ -239,25 +241,28 @@ class Dashboard extends Component{
       this.props.getPlayersOfTeam(this.props.myClubId, true);
     }
 
+    if(this.props.refetchPackages && this.props.refetchPackages !== prevProps.refetchPackages){
+      this.props.getPackages();
+    }
+
     if(this.props.packageById !== null && this.props.packageById !== prevProps.packageById){
       this.props.fetchAllRequestsFields(this.props.packageById);
     }
 
     if(this.props.requestsFields !== null && this.props.requestsFields !== prevProps.requestsFields){
+      console.log("fields refetched. ")
       this.setState({
         hp_from: this.props.requestsFields.FromNames,
         hp_to: this.props.requestsFields.ToNames,
         hp_player: this.props.requestsFields.PlayerNames,
       })
     }
+
   }
 
-  handleOpen = () => {
-    this.setState({modalOpen: true});
-  };
-
   handleClose = () => {
-    this.setState({modalOpen: false});
+    this.setState({modalOpen: false,
+      transferModalOpen: false,});
   };
 
   deleteRequest = (index) =>{
@@ -305,7 +310,8 @@ class Dashboard extends Component{
           style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center',
           marginBottom: 15}}
           onClick={()=>{
-            this.props.createPackage(this.state.tempRequests)}}>
+            this.props.createPackage(this.state.tempRequests);
+            this.setState({modalOpen: false});}}>
             <Typography variant="button">
             Submit
             </Typography>
@@ -322,7 +328,7 @@ class Dashboard extends Component{
           NewSalary: req.NewSalary,
           TransferFee: req.TransferFee,
           fromName: this.state.hp_from[i],
-          foName: this.state.hp_to[i],
+          toName: this.state.hp_to[i],
           playerName: this.state.hp_player[i],
          }: {};
 
@@ -342,14 +348,22 @@ class Dashboard extends Component{
    <Grid container={true} direction="row" justify="center">
    <Button fullWidth variant='contained' color="primary" 
             style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center', 
-            margin: 20}}>
+            margin: 20}} 
+            onClick={()=>{
+              this.props.signPackage(this.state.packageShown.PackageID, true);
+              this.setState({modalOpen: false});
+            }}>
               <Typography variant="button">
               Accept
               </Typography>
             </Button>
     <Button fullWidth variant='outlined' color="primary"
             style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center',
-            margin: 20}}>
+            margin: 20}}
+            onClick={()=>{
+              this.props.signPackage(this.state.packageShown.PackageID, false);
+              this.setState({modalOpen: false});
+            }}>
                 <Typography variant="button">
              Decline
               </Typography>
@@ -357,12 +371,12 @@ class Dashboard extends Component{
    </Grid>
 
    {(hoveri !== -1 && populated) ?
- <p style={{fontSize: 13, marginTop: 20}}>club <b>{this.state.hp_from[hoveri]}</b> will buy from club 
-   <b> {this.state.hp_to[hoveri]}</b> player <b>{this.state.hp_player[hoveri]}</b> with a fee of 
-   <b> {this.state.hp_fee}</b>; <b>{this.state.hp_player}</b>'s new salary is 
+ <p style={{fontSize: 13, marginTop: 20}}>club <b>{this.state.hp_to[hoveri]}</b> will buy from club 
+   <b> {this.state.hp_from[hoveri]}</b> player <b>{this.state.hp_player[hoveri]}</b> with a fee of 
+   <b> {this.state.hp_fee}</b>; <b>{this.state.hp_player[hoveri]}</b>'s new salary is 
    <b> {this.state.hp_salary}</b></p> : null
   }
-  
+
 </Grid>)
 
 :   <Grid container={true} direction="row" justify="space-between">
@@ -429,8 +443,8 @@ class Dashboard extends Component{
             </Button>
 
 { (this.state.tf_from && this.state.tf_to && this.state.tf_player) ?
-   <p style={{fontSize: 10}}>club <b>{this.state.tf_from}</b> will buy from club 
-   <b> {this.state.tf_to}</b> player <b>{this.state.tf_player}</b> with a fee of 
+   <p style={{fontSize: 10}}>club <b>{this.state.tf_to}</b> will buy from club 
+   <b> {this.state.tf_from}</b> player <b>{this.state.tf_player}</b> with a fee of 
    <b> {this.state.tf_fee}</b>; <b>{this.state.tf_player}</b>'s new salary is 
    <b> {this.state.tf_salary}</b></p>
 : <div style={{height: '30', width: '100%'}}/>}
@@ -491,6 +505,47 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
     </div>)
   }
 
+  globalTransfers (){
+
+    return(<Modal
+      aria-labelledby="spring-modal-title"
+      aria-describedby="spring-modal-description"
+      style={styles.modal}
+      open={this.state.transferModalOpen}
+      onClose={this.handleClose}
+      closeAfterTransition
+      BackdropComponent={Backdrop}
+      BackdropProps={{
+        timeout: 500,
+      }}
+    >
+      <Fade in={this.state.transferModalOpen} style={{outline: 0}}>
+        <div style={styles.paper}>
+        <p>Most recent transfers that took place globally:</p>
+          <GridList style={{height: '50%', justifyContent: 'flex-start',
+    alignItems: 'flex-start', overflow: 'auto',}}>
+          {this.props.globalTransfers? this.props.globalTransfers.map((transfer, i)=>{
+          return  <TransferInstance transfer={transfer} key={i} 
+            click={(pkgID)=>{ this.setState({})//TODO
+              this.props.getPackage(pkgID)}} />
+          }): <p>Nothing yet</p>}
+          </GridList>
+
+<GridList style={{flexDirection: 'column', width: '100%', height: '45%', overflow: 'auto',
+}}>
+          {this.state.hp_from? 
+          this.state.hp_from.map((fromName, index) =>{
+         return   <GridListTile key={index}>
+  <p>Club {this.state.hp_to[index]} bought player {this.state.hp_player[index]}
+  from Club {fromName} with a transfer fee of {this.state.hp_fee}</p>
+  </GridListTile>
+          }) : <div />}
+          </GridList>
+          </div>
+          </Fade>
+      </Modal>);
+  }
+
   registerResult(param){
     const t = param.type;
     const res = param.instance;
@@ -513,6 +568,7 @@ render(){
     <React.Fragment>
 
 {this.packageDetail(this.props.packageById, this.state.packageReadOnly)}
+{this.globalTransfers()}
 
       <Container component="main" 
       style={{ maxWidth: '100%' }}
@@ -596,15 +652,20 @@ borderRadius: 10}}>
             />) : <div />}
 </GridList> 
 
-
+<Button fullWidth variant='outlined' color="primary"
+            style={{height: 35, width: 300, alignItems: 'center', justifyContent: 'center',
+            margin: 20, marginTop: 30}}
+            onClick={()=>{
+              this.setState({transferModalOpen: true})
+              this.props.fetchGlobalTransfers();
+            }}>
+                <Typography variant="button">
+             View Global Transfers
+              </Typography>
+            </Button>
 </Box>
 </Grid>
 
-<Box style={{width: '50%', height: '35%', borderWidth: 2, borderColor: 'grey'}}>
-  <Typography>
-  Display successful transfers
-  </Typography>
-</Box>
 
       </Container>
 
@@ -626,6 +687,7 @@ function mapReduxStateToProps(reduxState) {
     myClubId: reduxState.global.myClubId,
     myClubPlayers: reduxState.global.myClubPlayers,
     refetchPlayers: reduxState.global.refetchPlayers,
+    refetchPackages: reduxState.global.refetchPackages,
 
     playersSearch: reduxState.global.playersSearch,
     clubsSearch: reduxState.global.clubsSearch,
@@ -633,6 +695,7 @@ function mapReduxStateToProps(reduxState) {
     packageById: reduxState.global.packageById,
 
     requestsFields: reduxState.global.requestsFields, //for readOnly requests' fields
+    globalTransfers: reduxState.global.globalTransfers,
   };
 }
 
@@ -675,6 +738,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     fetchAllRequestsFields: (requests)=>{
       dispatch(fetchAllRequestsFields(requests));
+    },
+    fetchGlobalTransfers: ()=>{
+      dispatch(fetchGlobalTransfers());
     }
   };
 };
@@ -764,6 +830,46 @@ class TempRequest extends Component{
       this.setState({opacity: 1})}}
     onClick={()=> { if(!this.props.read)
        this.props.deleteRequest(this.props.index)
+    }}>
+      {content}</Box>
+    );
+  }
+
+}
+
+class TransferInstance extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      opacity: 1,
+    }
+  }
+
+  render(){
+    const instance = this.props.transfer;
+
+  const content =  
+    <Grid container={true} direction="row" justify="space-between" >
+      <Grid item xs={12} sm={7}>
+    <b>PackageID</b>: {instance.PackageID} 
+    </Grid>
+      <Grid item xs={12} sm={5}>
+    <b>In Effect Since</b>
+    : {` ${instance.Date_Signed.substring(0, 10)} at ${instance.Date_Signed.substring(11,16)}`}
+    </Grid>
+    </Grid>
+
+    return (
+      <Box align="center" style={{ justifyContent: 'flex-start',
+      alignItems: 'center', borderRadius: 5, backgroundColor: 'white',
+    opacity: this.state.opacity, marginLeft: 10, marginRight: 10, marginTop: 8,
+  padding: 8, height: 50, width: '100%'}} 
+    onMouseEnter={() => {
+      this.setState({opacity: 0.6})}}
+    onMouseLeave={() => {
+      this.setState({opacity: 1})}}
+    onClick={()=> { 
+       this.props.click(instance.PackageID);
     }}>
       {content}</Box>
     );
