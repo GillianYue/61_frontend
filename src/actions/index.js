@@ -102,7 +102,7 @@ export function getPackages() {
 
     axios.get(`${ROOT_URL}/trade`)
       .then((response) => {
-        // console.log("getting packages: "+JSON.stringify(response));
+        console.log("getting packages: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.GET_PACKAGES, payload: response.data });
 
       })
@@ -201,12 +201,13 @@ export function searchTeams(param) {
   };
 }
 
+//TODO
 export function createPackage(requests) {
   return (dispatch) => {
     const body = {
       requests: requests,
-      //maybe something else
     }
+    console.log("before send: "+JSON.stringify(body))
     axios.post(`${ROOT_URL}/trade`, body)
       .then((response) => {
         dispatch({ type: ActionTypes.CREATE_Package, payload: response.data });
@@ -217,29 +218,65 @@ export function createPackage(requests) {
   };
 }
 
-//////////
-export function createOrder(order) {
-    return (dispatch) => {
-      axios.post(`${ROOT_URL}/order`, order)
-        .then((response) => {
-          dispatch({ type: ActionTypes.CREATE_ORDER, payload: "" });
-        })
-        .catch((error) => {
-          console.log(error.message);
-        });
-    };
+export function signPackage(id, accept){
+  return (dispatch) => {
+
+    const body = {
+      status: accept? 1: 0,
+    }
+
+    axios.put(`${ROOT_URL}/sign/${id}`, body)
+      .then((response) => {
+        console.log("sign package "+id+" result"+ JSON.stringify(response));
+        dispatch({ type: ActionTypes.EDIT_PLAYER, payload: response.data });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+
 }
 
+//////////
 
-export function updateUser(userId, params) {
+
+export function updatePlayer(id, params) {
     return (dispatch) => {
-      axios.put(`${ROOT_URL}/user/${userId}`, params)
+      axios.put(`${ROOT_URL}/players/${id}`, params)
         .then((response) => {
-          console.log("in update user"+response);
-          dispatch({ type: ActionTypes.UPDATE_USER, payload: response.data });
+          console.log("in update player"+ JSON.stringify(response));
+          dispatch({ type: ActionTypes.EDIT_PLAYER, payload: response.data });
         })
         .catch((error) => {
           console.log(error.message);
         });
     }
+}
+
+export function createPlayer(params) {
+  return (dispatch) => {
+
+    axios.post(`${ROOT_URL}/players`, params)
+      .then((response) => {
+        console.log("in create player"+ JSON.stringify(response));
+        dispatch({ type: ActionTypes.CREATE_PLAYER, payload: response.data });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+}
+
+export function deletePlayer(id) {
+  return (dispatch) => {
+
+    axios.delete(`${ROOT_URL}/players/${id}`)
+      .then((response) => {
+        console.log("in delete player"+ JSON.stringify(response));
+        dispatch({ type: ActionTypes.DELETE_PLAYER, payload: response.data });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
 }

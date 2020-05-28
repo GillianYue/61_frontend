@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getPackages, getTeam, getPackage, getPlayersOfTeam,
-searchPlayers, searchTeams } from './actions';
+searchPlayers, searchTeams, createPackage, updatePlayer,
+createPlayer, deletePlayer, signPackage } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -191,7 +192,7 @@ class PendingPackage extends Component{
 }
 
   render(){
-    const tier = this.props.tier;
+    const tier = this.props.pkg;
   return (              
     <GridListTile style={{width: '100%'}}
     key={tier.title} cols={2} rows={1}>
@@ -280,6 +281,12 @@ class Dashboard extends Component{
       search_text: '',
 
       searchResults: [],
+
+      hp_fee: 0,
+      hp_salary: 0,
+      hp_from: '',
+      hp_to: '',
+      hp_player: '',
     };
 
     this.props.getPackages();
@@ -287,6 +294,7 @@ class Dashboard extends Component{
     this.props.getPlayersOfTeam(this.props.myClubId, true);
 
     this.registerResult = this.registerResult.bind(this);
+    this.setHelperText = this.setHelperText.bind(this);
   }
 
 
@@ -327,6 +335,16 @@ class Dashboard extends Component{
 
   }
 
+  setHelperText = (from, to, player, fee, salary) => {
+    this.setState({
+      hp_fee: fee,
+      hp_to: to,
+      hp_from: from,
+      hp_salary: salary,
+      hp_player: player,
+    })
+  }
+
   packageDetail (pkg, readOnly){
 
     return (
@@ -345,17 +363,59 @@ class Dashboard extends Component{
       >
         <Fade in={this.state.modalOpen} style={{outline: 0}}>
           <div style={styles.paper}>
-            <div>Requests in this package: </div>
-              <div style={{backgroundColor: '#8c94a1', width: '85%', height: '40%',
+
+        {this.state.packageReadOnly? 
+          <div>Requests in this package: </div>:
+          <Grid container={true} direction="row" justify="space-between"> 
+          Create new trade package:           
+            <Button fullWidth variant='contained' color="primary" 
+          style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center',
+          marginBottom: 15}}
+          onClick={()=>{
+            this.props.createPackage(this.state.tempRequests)}}>
+            <Typography variant="button">
+            Submit
+            </Typography>
+          </Button>
+          </Grid>
+          }
+              <div style={{backgroundColor: '#8c94a1', width: '85%', 
+              height: this.state.packageReadOnly? '60%':'40%',
             opacity: 0.1, borderRadius: 5, alignSelf: 'center', paddingTop: 20}}>
                 {this.state.tempRequests.map((req, i)=>{
-                  return <TempRequest key={i} request={req} index={i}
-                  deleteRequest={this.deleteRequest} />
+                  return <TempRequest key={i} request={req} index={i} read={this.state.packageReadOnly}
+                  deleteRequest={this.deleteRequest} setHelperText={this.setHelperText}/>
                 })}
               </div>
 
-      <Grid container={true} direction="row" justify="space-between">
+{this.state.packageReadOnly ? 
+(<Grid container={true} direction="column" justify="space-between">
+  {(this.state.hp_to && this.state.hp_from && this.state.hp_player) ?
+ <p style={{fontSize: 13, marginTop: 20}}>club <b>{this.state.hp_from}</b> will buy from club 
+   <b> {this.state.hp_to}</b> player <b>{this.state.hp_player}</b> with a fee of 
+   <b> {this.state.hp_fee}</b>; <b>{this.state.hp_player}</b>'s new salary is 
+   <b> {this.state.hp_salary}</b></p> : null
+  }
+   <Grid container={true} direction="row" justify="center">
+   <Button fullWidth variant='contained' color="primary" 
+            style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center', 
+            margin: 20}}>
+              <Typography variant="button">
+              Accept
+              </Typography>
+            </Button>
+    <Button fullWidth variant='outlined' color="primary"
+            style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center',
+            margin: 20}}>
+                <Typography variant="button">
+             Decline
+              </Typography>
+            </Button>
+   </Grid>
 
+</Grid>)
+
+:   <Grid container={true} direction="row" justify="space-between">
           <Box style={{width: '50%'}}>
           <Grid container={true} direction="row" justify="space-between"
       style={{marginTop: 10}}>
@@ -400,15 +460,14 @@ class Dashboard extends Component{
     <Button fullWidth variant='contained' color="primary" 
     onClick={()=>{
       var joined = this.state.tempRequests.concat({
-        from: this.state.from_id,
+        From: this.state.from_id,
         fromName: this.state.tf_from,
-        to: this.state.to_id,
+        To: this.state.to_id,
         toName: this.state.tf_to,
-        playerId: this.state.player_id,
+        PlayerID: this.state.player_id,
         playerName: this.state.tf_player,
-        transfer_fee: this.state.tf_fee,
-        salary: this.state.tf_salary,
-        date: Date(),
+        TransferFee: this.state.tf_fee,
+        NewSalary: this.state.tf_salary,
       });
       this.setState({tempRequests: joined});
      }} ///////
@@ -474,7 +533,9 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
 
 </Box>
 </Box>
-          </Grid>
+          </Grid>}
+
+
 
           </div>
         </Fade>
@@ -521,17 +582,21 @@ render(){
           icons={tableIcons}
 
           editable={{
-            onRowAdd: (newData) =>
-              new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve();
-                  this.setState((prevState) => {
-                    const data = [...prevState.data];
-                    data.push(newData);
-                    return { ...prevState, data };
-                  });
-                }, 600);
-              }),
+            onRowAdd: (newData) =>{
+              console.log("adding player: "+JSON.stringify(newData))
+
+              // this.props.createPlayer(newData);
+            },
+              // new Promise((resolve) => {
+              //   setTimeout(() => {
+              //     resolve();
+              //     this.setState((prevState) => {
+              //       const data = [...prevState.data];
+              //       data.push(newData);
+              //       return { ...prevState, data };
+              //     });
+              //   }, 600);
+              // }),
             onRowUpdate: (newData, oldData) =>
               new Promise((resolve) => {
                 setTimeout(() => {
@@ -573,9 +638,13 @@ borderRadius: 10}}>
       <GridList 
           cellHeight={200} spacing={1} 
           style={styles.gl}>
-            {tiers.map((tier) => <PendingPackage tier={tier} key={tier.title}
-            click={() => this.setState({ modalOpen: true, packageShown: tier, 
+
+            {tiers.map((pendingPackage) => 
+            <PendingPackage pkg={pendingPackage} key={pendingPackage.title}
+            click={() => this.setState({ modalOpen: true, packageShown: pendingPackage, 
               packageReadOnly: true })}
+
+
             />)}
 </GridList> 
 
@@ -608,6 +677,8 @@ function mapReduxStateToProps(reduxState) {
     myClub: reduxState.global.myClub,
     myClubId: reduxState.global.myClubId,
     myClubPlayers: reduxState.global.myClubPlayers,
+    refetchPlayers: reduxState.global.refetchPlayers,
+
     playersSearch: reduxState.global.playersSearch,
     clubsSearch: reduxState.global.clubsSearch,
     clubById: reduxState.global.clubById,
@@ -633,6 +704,23 @@ const mapDispatchToProps = (dispatch) => {
     },
     searchTeams: (term) => {
       dispatch(searchTeams(term));
+    },
+    createPackage: (requests) => {
+      dispatch(createPackage(requests));
+    },
+
+    updatePlayer: (id, params) => {
+      dispatch(updatePlayer(id, params));
+    },
+    createPlayer: (params) => {
+      dispatch(createPlayer(params));
+    },
+    deletePlayer: (id) => {
+      dispatch(deletePlayer(id));
+    },
+
+    signPackage: (id)=>{
+      dispatch(signPackage(id))
     }
   };
 };
@@ -705,16 +793,23 @@ class TempRequest extends Component{
 
   const content =  <p style={{color: 'black', justifyContent: 'center',
   alignItems: 'center', margin: 0, padding: 0, opacity: 1}}>
-    From: {fromName} To: {toName} Player: {playerName} Fee: {req.transfer_fee} New_Salary: {req.salary}</p>
+    From: {fromName} To: {toName} Player: {playerName} Fee: {req.TransferFee} New_Salary: {req.NewSalary}</p>
 
     return (
       <Box align="center" style={{ justifyContent: 'center',
       alignItems: 'center', borderRadius: 5, backgroundColor: 'white',
     opacity: this.state.opacity, marginLeft: 10, marginRight: 10,
   padding: 5, height: 'auto'}} 
-    onMouseEnter={() => this.setState({opacity: 0.7})}
-    onMouseLeave={() => this.setState({opacity: 1})}
-    onClick={()=> { this.props.deleteRequest(this.props.index)
+    onMouseEnter={() => {
+      if(this.props.read)
+      this.props.setHelperText(fromName, toName, playerName, req.TransferFee, req.NewSalary);
+      this.setState({opacity: 0.7})}}
+    onMouseLeave={() => {
+      if(this.props.read)
+      this.props.setHelperText('', '', '', 0, 0);
+      this.setState({opacity: 1})}}
+    onClick={()=> { if(!this.props.read)
+       this.props.deleteRequest(this.props.index)
     }}>
       {content}</Box>
     );

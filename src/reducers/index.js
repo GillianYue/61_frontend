@@ -17,6 +17,7 @@ const initialState = {
     clubsSearch: null,
 
     myUsername: null,
+    pkgCreated: null,
  };
 
 const globalReducer = (state = initialState, action) => {
@@ -48,8 +49,9 @@ const globalReducer = (state = initialState, action) => {
           clubByIdPlayers: action.payload.response,
   });
       case ActionTypes.GET_PACKAGES:
+        console.log("getting packages: "+JSON.stringify(action.payload.response))
         return Object.assign({}, state, {
-        pending_packages: action.payload,
+        pending_packages: action.payload.response,
     });
     case ActionTypes.SEARCH_PLAYERS: //
       return Object.assign({}, state, {
@@ -58,6 +60,11 @@ const globalReducer = (state = initialState, action) => {
     case ActionTypes.SEARCH_TEAMS: //
       return Object.assign({}, state, {
       clubsSearch: action.payload.response,
+  });
+    case ActionTypes.CREATE_PACKAGE: //
+    console.log("package create result: "+ JSON.stringify(action.payload))
+    return Object.assign({}, state, {
+     pkgCreated: action.payload.response,
   });
           default: 
             return state;
