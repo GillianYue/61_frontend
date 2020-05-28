@@ -94,7 +94,7 @@ render(){
             width: 400,
           marginRight: 100,
           }}/>
-                <Grid container direction="row" style={{width: 230, flexDirection: 'row',
+                <Grid container direction="row" style={{width: 300, flexDirection: 'row',
               justifyContent: 'flex-start', alignItems: 'flex-start'}}>
                 <Typography variant="button" color="inherit" noWrap style={styles.toolbarTitle}>
                   Welcome back, 

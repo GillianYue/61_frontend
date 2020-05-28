@@ -11,6 +11,7 @@ export const ActionTypes = {
 
     CREATE_PACKAGE: 'CREATE_PACKAGE',
     GET_PACKAGES: 'GET_PACKAGES',
+    GET_PACKAGE: 'GET_PACKAGE',
     GET_TRANSFERS: 'GET_TRANSFERS',
 
     GET_TEAM: 'GET_TEAM',
@@ -24,6 +25,10 @@ export const ActionTypes = {
     MANAGER_SIGNIN: 'MANAGER_SIGNIN',
     MANAGER_SIGNOUT: 'MANAGER_SIGNOUT',
 
+    GET_GLOBAL_TRANSFERS: 'GET_GLOBAL_TRANSFERS',
+    GET_MY_TRANSFERS: 'GET_MY_TRANSFERS',
+
+    FETCH_REQUESTS_FIELDS: 'FETCH_REQUESTS_FIELDS',
   };
 
 
@@ -102,7 +107,7 @@ export function getPackages() {
 
     axios.get(`${ROOT_URL}/trade`)
       .then((response) => {
-        console.log("getting packages: "+JSON.stringify(response));
+        // console.log("getting packages: "+JSON.stringify(response));
         dispatch({ type: ActionTypes.GET_PACKAGES, payload: response.data });
 
       })
@@ -119,8 +124,7 @@ export function getPackage(id) {
 
     axios.get(`${ROOT_URL}/trade/${id}`)
       .then((response) => {
-        // console.log("getting package: "+JSON.stringify(response));
-        dispatch({ type: ActionTypes.GET_PACKAGES, payload: response.data });
+        dispatch({ type: ActionTypes.GET_PACKAGE, payload: response.data });
 
       })
       .catch((error) => {
@@ -143,8 +147,9 @@ export function login(param) {
         localStorage.setItem('token', response.data.response);
         localStorage.setItem('myClubId', response.data.clubId);
 
-        axios.defaults.headers.common['Authorization'] = 'JWT ' + response.data.response
+        axios.defaults.headers.common['authorization'] = 'JWT ' + response.data.response
         dispatch({ type: ActionTypes.MANAGER_SIGNIN, payload: {
+          username: param.username,
           clubId: response.data.clubId,
           signinStatus: 'success'} });
       })
@@ -244,8 +249,7 @@ export function updatePlayer(id, params) {
     return (dispatch) => {
       axios.put(`${ROOT_URL}/players/${id}`, params)
         .then((response) => {
-          console.log("in update player"+ JSON.stringify(response));
-          dispatch({ type: ActionTypes.EDIT_PLAYER, payload: response.data });
+          dispatch({ type: ActionTypes.EDIT_PLAYER, payload: response.data.status });
         })
         .catch((error) => {
           console.log(error.message);
@@ -259,7 +263,7 @@ export function createPlayer(params) {
     axios.post(`${ROOT_URL}/players`, params)
       .then((response) => {
         console.log("in create player"+ JSON.stringify(response));
-        dispatch({ type: ActionTypes.CREATE_PLAYER, payload: response.data });
+        dispatch({ type: ActionTypes.CREATE_PLAYER, payload: response.data.status });
       })
       .catch((error) => {
         console.log(error.message);
@@ -272,11 +276,39 @@ export function deletePlayer(id) {
 
     axios.delete(`${ROOT_URL}/players/${id}`)
       .then((response) => {
-        console.log("in delete player"+ JSON.stringify(response));
-        dispatch({ type: ActionTypes.DELETE_PLAYER, payload: response.data });
+        dispatch({ type: ActionTypes.DELETE_PLAYER, payload: response.data.status });
       })
       .catch((error) => {
         console.log(error.message);
       });
+  }
+}
+
+
+export function fetchAllRequestsFields(requests){
+  return (dispatch) => {
+
+    var FromNames = [], ToNames = [], PlayerNames = [];
+
+    Promise.all(requests.map((r, index) => 
+      axios.get(`${ROOT_URL}/clubs/${r.From}`).then(fromTeam => {
+        FromNames[index] = fromTeam.data.response[0].ClubName;
+    return axios.get(`${ROOT_URL}/clubs/${r.To}`).then(toTeam => {
+      ToNames[index] = toTeam.data.response[0].ClubName;
+      return axios.get(`${ROOT_URL}/players/${r.PlayerID}`).then(player => {
+        const ply = player.data.response[0];
+        PlayerNames[index] = `${ply.FirstName} ${ply.LastName}`
+      })
+    });
+}))).then(results => {
+    const fields = {
+      FromNames: FromNames,
+      ToNames: ToNames,
+      PlayerNames: PlayerNames,
+    }
+    dispatch({ type: ActionTypes.FETCH_REQUESTS_FIELDS, payload: fields });
+}).catch(err => {
+    console.log(err);
+});
   }
 }

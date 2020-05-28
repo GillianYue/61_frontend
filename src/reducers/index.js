@@ -8,9 +8,11 @@ const initialState = {
 
     signin_success: null,
     pending_packages: null,
+    packageById: null,
 
     myClubId: null,
     myClubPlayers: null,
+    refetchPlayers: false,
     myClub: null,
 
     playersSearch: null,
@@ -18,6 +20,8 @@ const initialState = {
 
     myUsername: null,
     pkgCreated: null,
+
+    requestsFields: null,
  };
 
 const globalReducer = (state = initialState, action) => {
@@ -43,16 +47,20 @@ const globalReducer = (state = initialState, action) => {
       case ActionTypes.GET_OWN_TEAM_PLAYERS:
               return Object.assign({}, state, {
                 myClubPlayers: action.payload.response,
+              refetchPlayers: false,
       });
       case ActionTypes.GET_TEAM_PLAYERS: //
         return Object.assign({}, state, {
           clubByIdPlayers: action.payload.response,
   });
       case ActionTypes.GET_PACKAGES:
-        console.log("getting packages: "+JSON.stringify(action.payload.response))
         return Object.assign({}, state, {
         pending_packages: action.payload.response,
     });
+    case ActionTypes.GET_PACKAGE:
+      return Object.assign({}, state, {
+      packageById: action.payload.response,
+  });
     case ActionTypes.SEARCH_PLAYERS: //
       return Object.assign({}, state, {
       playersSearch: action.payload.response,
@@ -66,7 +74,25 @@ const globalReducer = (state = initialState, action) => {
     return Object.assign({}, state, {
      pkgCreated: action.payload.response,
   });
-          default: 
+
+    case ActionTypes.EDIT_PLAYER:
+      return Object.assign({}, state, {
+        refetchPlayers: (action.payload === 200),
+     });
+   case ActionTypes.DELETE_PLAYER:
+      return Object.assign({}, state, {
+        refetchPlayers: (action.payload === 200),
+     });
+   case ActionTypes.CREATE_PLAYER:
+      return Object.assign({}, state, {
+        refetchPlayers: (action.payload === 200),
+     });
+
+  case ActionTypes.FETCH_REQUESTS_FIELDS:
+    return Object.assign({}, state, {
+      requestsFields: action.payload,
+   });
+    default: 
             return state;
         }
 
