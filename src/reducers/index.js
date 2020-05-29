@@ -6,6 +6,9 @@ const initialState = {
     clubById: null,
     clubByIdPlayers: null,
 
+    positionsById: null,
+    allPositions: null,
+
     signin_success: null,
     pending_packages: null,
     packageById: null,
@@ -41,6 +44,16 @@ const globalReducer = (state = initialState, action) => {
         return Object.assign({}, state, {
         clubById: action.payload.response[0],
 });
+
+      case ActionTypes.GET_POSITION: //
+      return Object.assign({}, state, {
+      positionsById: action.payload.response,
+      });
+      case ActionTypes.GET_ALL_POSITIONS: //
+      return Object.assign({}, state, {
+      allPositions: action.payload.response,
+      });
+
       case ActionTypes.GET_OWN_TEAM: //
               return Object.assign({}, state, {
               myClub: action.payload.response[0],
@@ -72,7 +85,6 @@ const globalReducer = (state = initialState, action) => {
       clubsSearch: action.payload.response,
   });
     case ActionTypes.CREATE_PACKAGE: //
-    console.log("package create result: "+ JSON.stringify(action.payload))
     return Object.assign({}, state, {
      refetchPackages: true,
   });

@@ -8,6 +8,8 @@ export const ActionTypes = {
     CREATE_PLAYER: 'CREATE_PLAYER',
     EDIT_PLAYER: 'EDIT_PLAYER',
     DELETE_PLAYER: 'DELETE_PLAYER',
+    GET_POSITION: 'GET_POSITION',
+    GET_ALL_POSITIONS: 'GET_ALL_POSITIONS',
 
     CREATE_PACKAGE: 'CREATE_PACKAGE',
     SIGN_PACKAGE: 'SIGN_PACKAGE',
@@ -55,6 +57,34 @@ export function getPlayer(id) {
       })
       .catch((error) => {
         console.log("get player failed: "+ JSON.stringify(error));
+        console.log(error.message);
+      });
+  };
+}
+
+export function getPosition(id) {
+  return (dispatch) => {
+
+    axios.get(`${ROOT_URL}/player_positions/${id}`)
+      .then((response) => {
+        dispatch({ type: ActionTypes.GET_POSITION, payload: response.data });
+
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
+}
+
+export function getAllPositions() {
+  return (dispatch) => {
+
+    axios.get(`${ROOT_URL}/positions`)
+      .then((response) => {
+        dispatch({ type: ActionTypes.GET_ALL_POSITIONS, payload: response.data });
+
+      })
+      .catch((error) => {
         console.log(error.message);
       });
   };

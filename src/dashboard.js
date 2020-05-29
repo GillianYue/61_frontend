@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { getPackages, getTeam, getPackage, getPlayersOfTeam,
 searchPlayers, searchTeams, createPackage, updatePlayer,
 createPlayer, deletePlayer, signPackage, fetchAllRequestsFields,
-fetchGlobalTransfers } from './actions';
+fetchGlobalTransfers, getPosition, getAllPositions } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -41,7 +41,7 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 //
 
-import { FaPlusSquare as AddIcon } from 'react-icons/fa';
+import { FaPlusSquare as AddIcon, FaFutbol as SoccerIcon } from 'react-icons/fa';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
@@ -201,6 +201,7 @@ class Dashboard extends Component{
       search_text: '',
 
       searchResults: [],
+      allPos: null,
 
       hp_fee: 0,
       hp_salary: 0,
@@ -208,14 +209,19 @@ class Dashboard extends Component{
       hp_to: null,
       hp_player: null,
       hoverIndex: 0, //request on which the mouse is hovering over
+
+      panelRow: 0,
     };
 
     this.props.getPackages();
     this.props.getTeam(this.props.myClubId, true);
     this.props.getPlayersOfTeam(this.props.myClubId, true);
+    this.props.getAllPositions();
 
     this.registerResult = this.registerResult.bind(this);
     this.setHelperText = this.setHelperText.bind(this);
+
+    this.tableRef = React.createRef();
   }
 
 
@@ -258,6 +264,74 @@ class Dashboard extends Component{
       })
     }
 
+    if(this.props.allPositions !== null &&
+      this.props.allPositions !== prevProps.allPositions) 
+      {
+        var allPositions = [];         
+        allPositions.push("/"); //0 is id for null/NA
+        this.props.allPositions.map((pos, index) => {
+          allPositions.push(pos.PositionName);
+          return null;
+        })
+        this.setState({allPos: allPositions})}
+
+    if(this.props.positionsById !== prevProps.positionsById){
+  this.tableRef.current.onToggleDetailPanel([this.state.panelRow], 
+    rowData => this.detailPanel())
+    }
+  }
+
+  detailPanel (){
+    const p_pos = this.props.positionsById;
+    const npos = p_pos? p_pos.length : 0;
+
+    return (<div>
+
+      <Grid container={true} direction="row"> 
+                
+                <Select
+                labelId="demo-simple-select-required-label"
+                id="demo-simple-select-required"
+                value={npos>0? p_pos[0].PositionID : 0}
+                onChange={(event)=>{
+                console.log("update player pos")  
+                }}
+              >
+                {this.state.allPos.map((posName, index)=>{
+                  return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+                })}
+            </Select>
+      
+            <Select
+                labelId="demo-simple-select-required-label"
+                id="demo-simple-select-required"
+                value={npos>1? p_pos[1].PositionID : 0}
+                onChange={(event)=>{
+                console.log("update player pos")  
+                }}
+              >
+                {this.state.allPos.map((posName, index)=>{
+                  return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+                })}
+            </Select>
+      
+            <Select
+                labelId="demo-simple-select-required-label"
+                id="demo-simple-select-required"
+                value={npos>2? p_pos[2].PositionID : 0}
+                onChange={(event)=>{
+                console.log("update player pos")  
+                }}
+              >
+                {this.state.allPos.map((posName, index)=>{
+                  return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+                })}
+            </Select>
+      
+      
+            </Grid>
+      
+      </div>);
   }
 
   handleClose = () => {
@@ -564,6 +638,10 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
   }
 
 render(){
+
+  const p_pos = this.props.positionsById;
+  const npos = p_pos? p_pos.length : 0;
+
   return (
     <React.Fragment>
 
@@ -585,6 +663,80 @@ render(){
               data={this.state.data.map(x =>Object.assign({}, x))}
           title= {this.props.myClub ? this.props.myClub.ClubName: 'My Team'}
           icons={tableIcons}
+          tableRef={this.tableRef}
+
+          onRowClick={(event, rowData, togglePanel) => togglePanel()}
+
+          detailPanel={[
+            (row)=> ({
+            icon: ()=><SoccerIcon 
+            onClick={()=>{
+              //clicked
+              console.log("row: ", row)
+              this.props.getPosition(row.PlayerID);
+            }}
+            />,
+            // isFreeAction: true,
+            tooltip: 'Positions',
+            render: rowData => {
+            return (
+              <div  style={{
+                fontSize: 100,
+                textAlign: 'center',
+                color: 'white',
+                backgroundColor: '#FDD835',
+              }}
+            >
+              {p_pos? <div>
+
+<Grid container={true} direction="row"> 
+          
+          <Select
+          labelId="demo-simple-select-required-label"
+          id="demo-simple-select-required"
+          value={npos>0? p_pos[0].PositionID : 0}
+          onChange={(event)=>{
+          console.log("update player pos")  
+          }}
+        >
+          {this.state.allPos.map((posName, index)=>{
+            return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+          })}
+      </Select>
+
+      <Select
+          labelId="demo-simple-select-required-label"
+          id="demo-simple-select-required"
+          value={npos>1? p_pos[1].PositionID : 0}
+          onChange={(event)=>{
+          console.log("update player pos")  
+          }}
+        >
+          {this.state.allPos.map((posName, index)=>{
+            return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+          })}
+      </Select>
+
+      <Select
+          labelId="demo-simple-select-required-label"
+          id="demo-simple-select-required"
+          value={npos>2? p_pos[2].PositionID : 0}
+          onChange={(event)=>{
+          console.log("update player pos")  
+          }}
+        >
+          {this.state.allPos.map((posName, index)=>{
+            return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+          })}
+      </Select>
+
+
+      </Grid>
+
+</div> : <div>Loading...</div>}
+            </div>
+            )
+          } }) ] }
 
           editable={{
             onRowAdd: (newData) =>
@@ -692,6 +844,9 @@ function mapReduxStateToProps(reduxState) {
     playersSearch: reduxState.global.playersSearch,
     clubsSearch: reduxState.global.clubsSearch,
     clubById: reduxState.global.clubById,
+    positionsById: reduxState.global.positionsById,
+    allPositions: reduxState.global.allPositions,
+
     packageById: reduxState.global.packageById,
 
     requestsFields: reduxState.global.requestsFields, //for readOnly requests' fields
@@ -710,6 +865,15 @@ const mapDispatchToProps = (dispatch) => {
     getTeam: (id, own) => {
       dispatch(getTeam(id, own));
     },
+
+    getPosition: (id) => {
+      dispatch(getPosition(id));
+    },
+    getAllPositions: () => {
+      dispatch(getAllPositions());
+    },
+
+
     getPlayersOfTeam: (id, own) => {
       dispatch(getPlayersOfTeam(id, own));
     },
