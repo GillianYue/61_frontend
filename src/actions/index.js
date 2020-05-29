@@ -81,11 +81,13 @@ export function getListPositions(listID){
   return (dispatch) => {
     var posRes = [];
 
-    Promise.all(listID.map((id, index) => 
-      axios.get(`${ROOT_URL}/player_positions/${id}`).then(pos => {
+    Promise.all(listID.map((id, index) => {
+     return axios.get(`${ROOT_URL}/player_positions/${id}`).then(pos => {
        posRes.push(pos.data.response);
    
-}))).then(results => {
+})
+  }
+)).then(results => {
 
     dispatch({ type: ActionTypes.GET_LIST_POSITIONS, payload: posRes });
 }).catch(err => {

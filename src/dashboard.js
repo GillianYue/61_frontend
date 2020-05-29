@@ -232,11 +232,14 @@ class Dashboard extends Component{
     if(this.props.myClubPlayers !== null && 
       prevProps.myClubPlayers !== this.props.myClubPlayers) {
         this.setState({data: this.props.myClubPlayers});
+        const num = this.props.myClubPlayers.length;
 
         var listID = [];
         for(var i = 5*this.state.currPage; i < 5*this.state.currPage + 5; i++){
+          if(i < num)
              listID.push(this.props.myClubPlayers[i].PlayerID);
         }
+
         this.props.getListPositions(listID);
     }
     if(this.state.dropdown_search === 1 && 
@@ -282,6 +285,7 @@ class Dashboard extends Component{
     }
 
     if(this.props.listPositions !== prevProps.listPositions){
+      // console.log("list positions received ", this.props.listPositions)
       this.setState({listPositions: this.props.listPositions})
     }
 
@@ -554,8 +558,9 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
           <GridList style={{height: '50%', justifyContent: 'flex-start',
     alignItems: 'flex-start', overflow: 'auto',}}>
           {this.props.globalTransfers? this.props.globalTransfers.map((transfer, i)=>{
-          return  <TransferInstance transfer={transfer} key={i} 
-            click={(pkgID)=>{ this.setState({})//TODO
+          return  <TransferInstance transfer={transfer}  key={i} 
+            click={(pkgID)=>{
+
               this.props.getPackage(pkgID)}} />
           }): <p>Nothing yet</p>}
           </GridList>
@@ -564,10 +569,11 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
 }}>
           {this.state.hp_from? 
           this.state.hp_from.map((fromName, index) =>{
-         return   <GridListTile key={index}>
-  <p>Club {this.state.hp_to[index]} bought player {this.state.hp_player[index]}
-  from Club {fromName} with a transfer fee of {this.state.hp_fee}</p>
-  </GridListTile>
+
+        //  <GridListTile key={index}>
+        return    <p key={index}>Club {this.state.hp_to[index]} bought player {this.state.hp_player[index]}
+  from Club {fromName} with a transfer fee of {this.props.packageById[index].TransferFee}</p>
+  // </GridListTile>
           }) : <div />}
           </GridList>
           </div>
@@ -622,7 +628,9 @@ render(){
             this.setState({currPage: page});
 
             var listID = [];
+            const num = this.props.myClubPlayers.length;
             for(var i = 5*page; i < 5*page+5; i++){
+              if(i<num)
             listID.push(this.props.myClubPlayers[i].PlayerID);
             }
             this.props.getListPositions(listID);
@@ -730,6 +738,7 @@ render(){
               s[rowNum].map((p)=>{
           playerPos.push(p.PositionID);
           return null; })
+
          this.props.updatePlayer(row.PlayerID, {
            Player: {Age: row.Age},
           Positions: playerPos, })
