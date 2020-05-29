@@ -594,7 +594,7 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
 
 render(){
 
-  const poses = this.state.listPositions;
+  const poses = {...this.state.listPositions};
 
   return (
     <React.Fragment>
@@ -633,18 +633,6 @@ render(){
             (row)=> ({
             icon: ()=><SoccerIcon 
             onClick={()=>{
-              const rowNum = row.tableData.id;
-             if(this.state.listPositions[rowNum] !== this.props.listPositions[rowNum]){
-              var playerPos = [];
-              this.state.listPositions[rowNum].map((p)=>{
-                playerPos.push(p.PositionID);
-                return null;
-              })
-              this.props.updatePlayer(row.PlayerID, {
-                Positions: playerPos,
-              })
-             }
-
             }}
             />,
             tooltip: 'Positions',
@@ -653,10 +641,10 @@ render(){
             return (
               <div style={{height: 100, padding: 20}}>
 
-              <Grid container={true} direction="row"> 
+              <Grid container={true} direction="row" align="center" justify="center"
+              style={{justifyContent: 'space-around', alignItems: 'center'}}> 
                         <Typography>Position 1:</Typography>
                         <Select
-                        style={{marginBottom: 10}}
                         labelId="demo-simple-select-required-label"
                         id="demo-simple-select-required"
                         value={(poses && poses[rowNum][0]) ?
@@ -664,12 +652,14 @@ render(){
                         onChange={(event)=>{
 
                           const to = event.target.value;
-                          var s = poses; //temp store
+                          var s = poses, ss = [...poses[rowNum]], sss = {...ss[0]}; //temp store
                           if(poses[rowNum][0]){
-                          s[rowNum][0].PositionID = to;
+                          sss.PositionID = to;
                           }else{
-                          s[rowNum][0] = {PositionID: to}
+                          sss = {PositionID: to}
                           }
+                          ss[0] = sss;
+                          s[rowNum] = ss;
   
                           this.setState({listPositions: s});
 
@@ -679,7 +669,7 @@ render(){
                           return  <MenuItem key={index} value={index}>{posName}</MenuItem>
                         })}
                     </Select>
-              
+                    <Typography>Position 2:</Typography>
                     <Select
                         labelId="demo-simple-select-required-label"
                         id="demo-simple-select-required"
@@ -688,12 +678,15 @@ render(){
                         onChange={(event)=>{
 
                         const to = event.target.value;
-                        var s = poses; //temp store
+                        var s = poses, ss = [...poses[rowNum]], sss = {...ss[1]}; //temp store
                         if(poses[rowNum][1]){
-                        s[rowNum][1].PositionID = to;
+                        sss.PositionID = to;
                         }else{
-                        if(poses[rowNum][0]) s[rowNum][1] = {PositionID: to}
+                        if(poses[rowNum][0]) 
+                        sss = {PositionID: to}
                         }
+                        ss[1] = sss;
+                        s[rowNum] = ss;
 
                         this.setState({listPositions: s});
                         
@@ -703,7 +696,7 @@ render(){
                           return  <MenuItem key={index} value={index}>{posName}</MenuItem>
                         })}
                     </Select>
-              
+                    <Typography align="center">Position 3:</Typography>
                     <Select
                         labelId="demo-simple-select-required-label"
                         id="demo-simple-select-required"
@@ -711,14 +704,16 @@ render(){
                           poses[rowNum][2].PositionID : 0}
                         onChange={(event)=>{
                           const to = event.target.value;
-                          var s = poses; //temp store
+                          var s = poses, ss = [...poses[rowNum]], sss = {...ss[2]}; //temp store
                           if(poses[rowNum][2]){
-                          s[rowNum][2].PositionID = to;
+                          sss.PositionID = to;
                           }else{
                           if(poses[rowNum][0] && poses[rowNum][1]) 
-                          s[rowNum][2] = {PositionID: to}
+                          sss = {PositionID: to}
                           }
-  
+                          ss[2] = sss;
+                          s[rowNum] = ss;
+
                           this.setState({listPositions: s}); 
                         }}
                       >
@@ -726,10 +721,27 @@ render(){
                           return  <MenuItem key={index} value={index}>{posName}</MenuItem>
                         })}
                     </Select>
-              
+                    <Button fullWidth variant='contained' color="primary" 
+            style={{height: 35, width: 120, alignItems: 'center', justifyContent: 'center', 
+            margin: 20}} 
+            onClick={()=>{
+              var playerPos = [];
+              var s = {...this.state.listPositions};
+              s[rowNum].map((p)=>{
+          playerPos.push(p.PositionID);
+          return null; })
+         this.props.updatePlayer(row.PlayerID, {
+           Player: {Age: row.Age},
+          Positions: playerPos, })
+           }}>
+              <Typography variant="button">
+              Save
+              </Typography>
+            </Button>
               
                     </Grid>
-              
+
+
               </div> 
             )
           } }) ] }

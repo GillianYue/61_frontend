@@ -298,6 +298,7 @@ export function signPackage(id, accept){
 
 export function updatePlayer(id, params) {
     return (dispatch) => {
+
       axios.put(`${ROOT_URL}/players/${id}`, params)
         .then((response) => {
           dispatch({ type: ActionTypes.EDIT_PLAYER, payload: response.data.status });
