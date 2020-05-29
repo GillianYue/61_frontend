@@ -4,7 +4,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import { withRouter } from 'react-router-dom';
-import { getPlayer, getTeam, getPlayersOfTeam } from './actions';
+import { getPlayer, getTeam, getPlayersOfTeam, getAllPositions,
+getPosition } from './actions';
 import { connect } from 'react-redux';
 
 const styles = {
@@ -40,10 +41,13 @@ class Profile extends Component{
           clubByIdPlayers: []
       }
       if(this.props.location.state.type==='player'){
-      this.props.getTeam(this.props.location.state.instance.ClubID, false);
+        const ply = this.props.location.state.instance;
+      this.props.getTeam(ply.ClubID, false);
+      this.props.getPosition(ply.PlayerID);
       }else{ //must be a team
       this.props.getPlayersOfTeam(this.props.location.state.instance.ClubID, false)
       }
+      if(!this.props.allPositions) this.props.getAllPositions();
     }
 
     componentDidUpdate(prevProps){
@@ -131,6 +135,20 @@ class Profile extends Component{
           />
         </Grid>
 
+    {this.props.positionsById ? 
+    this.props.positionsById.map((pos, index)=> 
+        <Grid key={index}item xs={12} sm={4}>
+        <TextField
+        InputProps={{
+          readOnly: true,
+        }}
+          label={`Position ${index}`}
+          value={this.props.allPositions[pos.PositionID]}
+          fullWidth
+        />
+        </Grid>)
+         : null
+  }
       </Grid>
 
               </React.Fragment>
@@ -242,6 +260,8 @@ function mapReduxStateToProps(reduxState) {
   return {
     clubById: reduxState.global.clubById,
     clubByIdPlayers: reduxState.global.clubByIdPlayers,
+    allPositions: reduxState.global.allPositions,
+    positionsById: reduxState.global.positionsById,
   };
 }
 
@@ -250,12 +270,18 @@ const mapDispatchToProps = (dispatch) => {
     getPlayer: (id) => {
       dispatch(getPlayer(id));
     },
+    getPosition: (id) => {
+      dispatch(getPosition(id));
+    },
     getTeam: (id, own) => {
       dispatch(getTeam(id, own));
     },
     getPlayersOfTeam: (id, own) => {
       dispatch(getPlayersOfTeam(id, own));
-    }
+    },
+    getAllPositions: () => {
+      dispatch(getAllPositions());
+    },
   };
 };
 

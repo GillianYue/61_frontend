@@ -8,6 +8,7 @@ const initialState = {
 
     positionsById: null,
     allPositions: null,
+    listPositions: null,
 
     signin_success: null,
     pending_packages: null,
@@ -49,9 +50,21 @@ const globalReducer = (state = initialState, action) => {
       return Object.assign({}, state, {
       positionsById: action.payload.response,
       });
+
       case ActionTypes.GET_ALL_POSITIONS: //
+      var allPositions = [];         
+      allPositions.push("/"); //0 is id for null/NA
+      action.payload.response.map((pos, index) => {
+        allPositions.push(pos.PositionName);
+        return null;
+      })
       return Object.assign({}, state, {
-      allPositions: action.payload.response,
+      allPositions: allPositions,
+      });
+
+      case ActionTypes.GET_LIST_POSITIONS: //
+      return Object.assign({}, state, {
+      listPositions: action.payload,
       });
 
       case ActionTypes.GET_OWN_TEAM: //

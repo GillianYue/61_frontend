@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import { getPackages, getTeam, getPackage, getPlayersOfTeam,
 searchPlayers, searchTeams, createPackage, updatePlayer,
 createPlayer, deletePlayer, signPackage, fetchAllRequestsFields,
-fetchGlobalTransfers, getPosition, getAllPositions } from './actions';
+fetchGlobalTransfers, getPosition, getAllPositions, getListPositions,
+ } from './actions';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -210,7 +211,8 @@ class Dashboard extends Component{
       hp_player: null,
       hoverIndex: 0, //request on which the mouse is hovering over
 
-      panelRow: 0,
+      listPositions: null,
+      currPage: 0,
     };
 
     this.props.getPackages();
@@ -222,13 +224,20 @@ class Dashboard extends Component{
     this.setHelperText = this.setHelperText.bind(this);
 
     this.tableRef = React.createRef();
+
   }
 
 
   componentDidUpdate(prevProps){
     if(this.props.myClubPlayers !== null && 
       prevProps.myClubPlayers !== this.props.myClubPlayers) {
-        this.setState({data: this.props.myClubPlayers})
+        this.setState({data: this.props.myClubPlayers});
+
+        var listID = [];
+        for(var i = 5*this.state.currPage; i < 5*this.state.currPage + 5; i++){
+             listID.push(this.props.myClubPlayers[i].PlayerID);
+        }
+        this.props.getListPositions(listID);
     }
     if(this.state.dropdown_search === 1 && 
       this.props.playersSearch !== prevProps.playersSearch){
@@ -256,7 +265,6 @@ class Dashboard extends Component{
     }
 
     if(this.props.requestsFields !== null && this.props.requestsFields !== prevProps.requestsFields){
-      console.log("fields refetched. ")
       this.setState({
         hp_from: this.props.requestsFields.FromNames,
         hp_to: this.props.requestsFields.ToNames,
@@ -267,72 +275,19 @@ class Dashboard extends Component{
     if(this.props.allPositions !== null &&
       this.props.allPositions !== prevProps.allPositions) 
       {
-        var allPositions = [];         
-        allPositions.push("/"); //0 is id for null/NA
-        this.props.allPositions.map((pos, index) => {
-          allPositions.push(pos.PositionName);
-          return null;
-        })
-        this.setState({allPos: allPositions})}
+
+        this.setState({allPos: this.props.allPositions})}
 
     if(this.props.positionsById !== prevProps.positionsById){
-  this.tableRef.current.onToggleDetailPanel([this.state.panelRow], 
-    rowData => this.detailPanel())
     }
+
+    if(this.props.listPositions !== prevProps.listPositions){
+      this.setState({listPositions: this.props.listPositions})
+    }
+
+
   }
-
-  detailPanel (){
-    const p_pos = this.props.positionsById;
-    const npos = p_pos? p_pos.length : 0;
-
-    return (<div>
-
-      <Grid container={true} direction="row"> 
-                
-                <Select
-                labelId="demo-simple-select-required-label"
-                id="demo-simple-select-required"
-                value={npos>0? p_pos[0].PositionID : 0}
-                onChange={(event)=>{
-                console.log("update player pos")  
-                }}
-              >
-                {this.state.allPos.map((posName, index)=>{
-                  return  <MenuItem key={index} value={index}>{posName}</MenuItem>
-                })}
-            </Select>
-      
-            <Select
-                labelId="demo-simple-select-required-label"
-                id="demo-simple-select-required"
-                value={npos>1? p_pos[1].PositionID : 0}
-                onChange={(event)=>{
-                console.log("update player pos")  
-                }}
-              >
-                {this.state.allPos.map((posName, index)=>{
-                  return  <MenuItem key={index} value={index}>{posName}</MenuItem>
-                })}
-            </Select>
-      
-            <Select
-                labelId="demo-simple-select-required-label"
-                id="demo-simple-select-required"
-                value={npos>2? p_pos[2].PositionID : 0}
-                onChange={(event)=>{
-                console.log("update player pos")  
-                }}
-              >
-                {this.state.allPos.map((posName, index)=>{
-                  return  <MenuItem key={index} value={index}>{posName}</MenuItem>
-                })}
-            </Select>
-      
-      
-            </Grid>
-      
-      </div>);
-  }
+  
 
   handleClose = () => {
     this.setState({modalOpen: false,
@@ -639,8 +594,7 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
 
 render(){
 
-  const p_pos = this.props.positionsById;
-  const npos = p_pos? p_pos.length : 0;
+  const poses = this.state.listPositions;
 
   return (
     <React.Fragment>
@@ -664,77 +618,119 @@ render(){
           title= {this.props.myClub ? this.props.myClub.ClubName: 'My Team'}
           icons={tableIcons}
           tableRef={this.tableRef}
+          onChangePage={(page)=>{
+            this.setState({currPage: page});
 
+            var listID = [];
+            for(var i = 5*page; i < 5*page+5; i++){
+            listID.push(this.props.myClubPlayers[i].PlayerID);
+            }
+            this.props.getListPositions(listID);
+          }}
           onRowClick={(event, rowData, togglePanel) => togglePanel()}
 
           detailPanel={[
             (row)=> ({
             icon: ()=><SoccerIcon 
             onClick={()=>{
-              //clicked
-              console.log("row: ", row)
-              this.props.getPosition(row.PlayerID);
+              const rowNum = row.tableData.id;
+             if(this.state.listPositions[rowNum] !== this.props.listPositions[rowNum]){
+              var playerPos = [];
+              this.state.listPositions[rowNum].map((p)=>{
+                playerPos.push(p.PositionID);
+                return null;
+              })
+              this.props.updatePlayer(row.PlayerID, {
+                Positions: playerPos,
+              })
+             }
+
             }}
             />,
-            // isFreeAction: true,
             tooltip: 'Positions',
             render: rowData => {
+              const rowNum = rowData.tableData.id % 5;
             return (
-              <div  style={{
-                fontSize: 100,
-                textAlign: 'center',
-                color: 'white',
-                backgroundColor: '#FDD835',
-              }}
-            >
-              {p_pos? <div>
+              <div style={{height: 100, padding: 20}}>
 
-<Grid container={true} direction="row"> 
-          
-          <Select
-          labelId="demo-simple-select-required-label"
-          id="demo-simple-select-required"
-          value={npos>0? p_pos[0].PositionID : 0}
-          onChange={(event)=>{
-          console.log("update player pos")  
-          }}
-        >
-          {this.state.allPos.map((posName, index)=>{
-            return  <MenuItem key={index} value={index}>{posName}</MenuItem>
-          })}
-      </Select>
+              <Grid container={true} direction="row"> 
+                        <Typography>Position 1:</Typography>
+                        <Select
+                        style={{marginBottom: 10}}
+                        labelId="demo-simple-select-required-label"
+                        id="demo-simple-select-required"
+                        value={(poses && poses[rowNum][0]) ?
+                          poses[rowNum][0].PositionID : 0}
+                        onChange={(event)=>{
 
-      <Select
-          labelId="demo-simple-select-required-label"
-          id="demo-simple-select-required"
-          value={npos>1? p_pos[1].PositionID : 0}
-          onChange={(event)=>{
-          console.log("update player pos")  
-          }}
-        >
-          {this.state.allPos.map((posName, index)=>{
-            return  <MenuItem key={index} value={index}>{posName}</MenuItem>
-          })}
-      </Select>
+                          const to = event.target.value;
+                          var s = poses; //temp store
+                          if(poses[rowNum][0]){
+                          s[rowNum][0].PositionID = to;
+                          }else{
+                          s[rowNum][0] = {PositionID: to}
+                          }
+  
+                          this.setState({listPositions: s});
 
-      <Select
-          labelId="demo-simple-select-required-label"
-          id="demo-simple-select-required"
-          value={npos>2? p_pos[2].PositionID : 0}
-          onChange={(event)=>{
-          console.log("update player pos")  
-          }}
-        >
-          {this.state.allPos.map((posName, index)=>{
-            return  <MenuItem key={index} value={index}>{posName}</MenuItem>
-          })}
-      </Select>
+                        }}
+                      >
+                        {this.state.allPos.map((posName, index)=>{
+                          return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+                        })}
+                    </Select>
+              
+                    <Select
+                        labelId="demo-simple-select-required-label"
+                        id="demo-simple-select-required"
+                        value={(poses && poses[rowNum][1]) ?
+                          poses[rowNum][1].PositionID : 0}
+                        onChange={(event)=>{
 
+                        const to = event.target.value;
+                        var s = poses; //temp store
+                        if(poses[rowNum][1]){
+                        s[rowNum][1].PositionID = to;
+                        }else{
+                        if(poses[rowNum][0]) s[rowNum][1] = {PositionID: to}
+                        }
 
-      </Grid>
-
-</div> : <div>Loading...</div>}
-            </div>
+                        this.setState({listPositions: s});
+                        
+                        }}
+                      >
+                        {this.state.allPos.map((posName, index)=>{
+                          return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+                        })}
+                    </Select>
+              
+                    <Select
+                        labelId="demo-simple-select-required-label"
+                        id="demo-simple-select-required"
+                        value={(poses && poses[rowNum][2]) ?
+                          poses[rowNum][2].PositionID : 0}
+                        onChange={(event)=>{
+                          const to = event.target.value;
+                          var s = poses; //temp store
+                          if(poses[rowNum][2]){
+                          s[rowNum][2].PositionID = to;
+                          }else{
+                          if(poses[rowNum][0] && poses[rowNum][1]) 
+                          s[rowNum][2] = {PositionID: to}
+                          }
+  
+                          this.setState({listPositions: s}); 
+                        }}
+                      >
+                        {this.state.allPos.map((posName, index)=>{
+                          return  <MenuItem key={index} value={index}>{posName}</MenuItem>
+                        })}
+                    </Select>
+              
+              
+                    </Grid>
+              
+              </div> 
             )
           } }) ] }
 
@@ -759,12 +755,14 @@ render(){
               new Promise((resolve) => {
                 setTimeout(() => {
                 const body = {
+                  Player: {
                   FirstName: newData.FirstName,
                   LastName: newData.LastName,
                   Age: newData.Age,
                   Salary: newData.Salary,
                   ClubID: this.props.myClubId ? 
                   this.props.myClubId: localStorage.getItem('myClubId'),
+                  }
                 }
                 this.props.updatePlayer(oldData.PlayerID, body);
                 resolve();
@@ -846,6 +844,7 @@ function mapReduxStateToProps(reduxState) {
     clubById: reduxState.global.clubById,
     positionsById: reduxState.global.positionsById,
     allPositions: reduxState.global.allPositions,
+    listPositions: reduxState.global.listPositions,
 
     packageById: reduxState.global.packageById,
 
@@ -871,6 +870,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     getAllPositions: () => {
       dispatch(getAllPositions());
+    },
+    getListPositions: (listID) => {
+      dispatch(getListPositions(listID));
     },
 
 
@@ -1019,7 +1021,7 @@ class TransferInstance extends Component{
     </Grid>
       <Grid item xs={12} sm={5}>
     <b>In Effect Since</b>
-    : {` ${instance.Date_Signed.substring(0, 10)} at ${instance.Date_Signed.substring(11,16)}`}
+    : {` ${instance.DateSigned.substring(0, 10)} at ${instance.DateSigned.substring(11,16)}`}
     </Grid>
     </Grid>
 

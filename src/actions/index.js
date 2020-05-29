@@ -10,6 +10,7 @@ export const ActionTypes = {
     DELETE_PLAYER: 'DELETE_PLAYER',
     GET_POSITION: 'GET_POSITION',
     GET_ALL_POSITIONS: 'GET_ALL_POSITIONS',
+    GET_LIST_POSITIONS: 'GET_LIST_POSITIONS',
 
     CREATE_PACKAGE: 'CREATE_PACKAGE',
     SIGN_PACKAGE: 'SIGN_PACKAGE',
@@ -74,6 +75,24 @@ export function getPosition(id) {
         console.log(error.message);
       });
   };
+}
+
+export function getListPositions(listID){
+  return (dispatch) => {
+    var posRes = [];
+
+    Promise.all(listID.map((id, index) => 
+      axios.get(`${ROOT_URL}/player_positions/${id}`).then(pos => {
+       posRes.push(pos.data.response);
+   
+}))).then(results => {
+
+    dispatch({ type: ActionTypes.GET_LIST_POSITIONS, payload: posRes });
+}).catch(err => {
+    console.log(err);
+});
+
+  }
 }
 
 export function getAllPositions() {
