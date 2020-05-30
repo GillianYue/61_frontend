@@ -920,8 +920,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(deletePlayer(id));
     },
 
-    signPackage: (id)=>{
-      dispatch(signPackage(id))
+    signPackage: (id, status)=>{
+      dispatch(signPackage(id, status))
     },
     fetchAllRequestsFields: (requests)=>{
       dispatch(fetchAllRequestsFields(requests));
