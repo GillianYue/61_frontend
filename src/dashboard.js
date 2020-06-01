@@ -153,7 +153,7 @@ class PendingPackage extends Component{
                 Date requested: 
               </Typography>
               <Typography variant="body1" color="textPrimary">
-                {` ${pkg.Date.substring(0, 10)} at ${pkg.Date.substring(11,16)}`}
+                {` ${pkg.Date.substring(0, 10)} `}
               </Typography>
   
             </div>
@@ -1044,7 +1044,7 @@ class TransferInstance extends Component{
     </Grid>
       <Grid item xs={12} sm={5}>
     <b>In Effect Since</b>
-    : {` ${instance.DateSigned.substring(0, 10)} at ${instance.DateSigned.substring(11,16)}`}
+    : {` ${instance.DateSigned.substring(0, 10)}`}
     </Grid>
     </Grid>
 

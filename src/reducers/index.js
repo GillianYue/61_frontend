@@ -126,6 +126,7 @@ const globalReducer = (state = initialState, action) => {
    });
 
    case ActionTypes.FETCH_GLOBAL_TRANSFERS:
+     console.log("global transfers fetched", action.payload.response)
     return Object.assign({}, state, {
       globalTransfers: action.payload.response,
    });

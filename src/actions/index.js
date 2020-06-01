@@ -347,6 +347,7 @@ export function fetchGlobalTransfers(){
 
   })
   .catch((error) => {
+    
     console.log(error.message);
   });
   }
