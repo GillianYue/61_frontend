@@ -234,13 +234,13 @@ class Dashboard extends Component{
         this.setState({data: this.props.myClubPlayers});
         const num = this.props.myClubPlayers.length;
 
-        var listID = [];
+        var listOfID = [];
         for(var i = 5*this.state.currPage; i < 5*this.state.currPage + 5; i++){
           if(i < num)
-             listID.push(this.props.myClubPlayers[i].PlayerID);
+             listOfID.push(this.props.myClubPlayers[i].PlayerID);
         }
 
-        this.props.getListPositions(listID);
+        this.props.getListPositions(listOfID);
     }
     if(this.state.dropdown_search === 1 && 
       this.props.playersSearch !== prevProps.playersSearch){
@@ -569,10 +569,10 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
 }}>
           {this.state.hp_from? 
           this.state.hp_from.map((fromName, index) =>{
-
+            const fee = this.props.packageById[index].TransferFee;
         //  <GridListTile key={index}>
         return    <p key={index}>Club {this.state.hp_to[index]} bought player {this.state.hp_player[index]}
-  from Club {fromName} with a transfer fee of {this.props.packageById[index].TransferFee}</p>
+  from Club {fromName} with a transfer fee of {fee? fee:0}</p>
   // </GridListTile>
           }) : <div />}
           </GridList>
@@ -627,13 +627,13 @@ render(){
           onChangePage={(page)=>{
             this.setState({currPage: page});
 
-            var listID = [];
+            var listOfID = [];
             const num = this.props.myClubPlayers.length;
             for(var i = 5*page; i < 5*page+5; i++){
               if(i<num)
-            listID.push(this.props.myClubPlayers[i].PlayerID);
+            listOfID.push(this.props.myClubPlayers[i].PlayerID);
             }
-            this.props.getListPositions(listID);
+            this.props.getListPositions(listOfID);
           }}
           onRowClick={(event, rowData, togglePanel) => togglePanel()}
 
@@ -645,7 +645,9 @@ render(){
             />,
             tooltip: 'Positions',
             render: rowData => {
-              const rowNum = rowData.tableData.id % 5;
+              
+              const pID = rowData.PlayerID;
+
             return (
               <div style={{height: 100, padding: 20}}>
 
@@ -655,19 +657,19 @@ render(){
                         <Select
                         labelId="demo-simple-select-required-label"
                         id="demo-simple-select-required"
-                        value={(poses && poses[rowNum][0]) ?
-                          poses[rowNum][0].PositionID : 0}
+                        value={(poses && poses[pID][0]) ?
+                          poses[pID][0].PositionID : 0}
                         onChange={(event)=>{
 
                           const to = event.target.value;
-                          var s = poses, ss = [...poses[rowNum]], sss = {...ss[0]}; //temp store
-                          if(poses[rowNum][0]){
+                          var s = poses, ss = [...poses[pID]], sss = {...ss[0]}; //temp store
+                          if(poses[pID][0]){
                           sss.PositionID = to;
                           }else{
                           sss = {PositionID: to}
                           }
                           ss[0] = sss;
-                          s[rowNum] = ss;
+                          s[pID] = ss;
   
                           this.setState({listPositions: s});
 
@@ -681,20 +683,20 @@ render(){
                     <Select
                         labelId="demo-simple-select-required-label"
                         id="demo-simple-select-required"
-                        value={(poses && poses[rowNum][1]) ?
-                          poses[rowNum][1].PositionID : 0}
+                        value={(poses && poses[pID][1]) ?
+                          poses[pID][1].PositionID : 0}
                         onChange={(event)=>{
 
                         const to = event.target.value;
-                        var s = poses, ss = [...poses[rowNum]], sss = {...ss[1]}; //temp store
-                        if(poses[rowNum][1]){
+                        var s = poses, ss = [...poses[pID]], sss = {...ss[1]}; //temp store
+                        if(poses[pID][1]){
                         sss.PositionID = to;
                         }else{
-                        if(poses[rowNum][0]) 
+                        if(poses[pID][0]) 
                         sss = {PositionID: to}
                         }
                         ss[1] = sss;
-                        s[rowNum] = ss;
+                        s[pID] = ss;
 
                         this.setState({listPositions: s});
                         
@@ -708,19 +710,19 @@ render(){
                     <Select
                         labelId="demo-simple-select-required-label"
                         id="demo-simple-select-required"
-                        value={(poses && poses[rowNum][2]) ?
-                          poses[rowNum][2].PositionID : 0}
+                        value={(poses && poses[pID][2]) ?
+                          poses[pID][2].PositionID : 0}
                         onChange={(event)=>{
                           const to = event.target.value;
-                          var s = poses, ss = [...poses[rowNum]], sss = {...ss[2]}; //temp store
-                          if(poses[rowNum][2]){
+                          var s = poses, ss = [...poses[pID]], sss = {...ss[2]}; //temp store
+                          if(poses[pID][2]){
                           sss.PositionID = to;
                           }else{
-                          if(poses[rowNum][0] && poses[rowNum][1]) 
+                          if(poses[pID][0] && poses[pID][1]) 
                           sss = {PositionID: to}
                           }
                           ss[2] = sss;
-                          s[rowNum] = ss;
+                          s[pID] = ss;
 
                           this.setState({listPositions: s}); 
                         }}
@@ -735,7 +737,7 @@ render(){
             onClick={()=>{
               var playerPos = [];
               var s = {...this.state.listPositions};
-              s[rowNum].map((p)=>{
+              s[pID].map((p)=>{
           playerPos.push(p.PositionID);
           return null; })
 
@@ -892,8 +894,8 @@ const mapDispatchToProps = (dispatch) => {
     getAllPositions: () => {
       dispatch(getAllPositions());
     },
-    getListPositions: (listID) => {
-      dispatch(getListPositions(listID));
+    getListPositions: (listOfID) => {
+      dispatch(getListPositions(listOfID));
     },
 
 

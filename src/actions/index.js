@@ -79,11 +79,11 @@ export function getPosition(id) {
 
 export function getListPositions(listID){
   return (dispatch) => {
-    var posRes = [];
+    var posRes = {};
 
     Promise.all(listID.map((id, index) => {
      return axios.get(`${ROOT_URL}/player_positions/${id}`).then(pos => {
-       posRes.push(pos.data.response);
+       posRes[id] = pos.data.response;
    
 })
   }

@@ -104,7 +104,7 @@ const globalReducer = (state = initialState, action) => {
   case ActionTypes.SIGN_PACKAGE: //
     return Object.assign({}, state, {
     refetchPackages: true,
-    refetchPlayers: action.payload.response[3] === 1,
+    refetchPlayers: action.payload.response.Approved,
   });
 
     case ActionTypes.EDIT_PLAYER:
