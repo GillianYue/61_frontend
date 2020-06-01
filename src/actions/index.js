@@ -199,6 +199,7 @@ export function login(param) {
         //verify the token
         localStorage.setItem('token', response.data.response);
         localStorage.setItem('myClubId', response.data.clubId);
+        localStorage.setItem('username', param.username);
 
         axios.defaults.headers.common['authorization'] = 'JWT ' + response.data.response
         dispatch({ type: ActionTypes.MANAGER_SIGNIN, payload: {

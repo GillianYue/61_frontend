@@ -569,7 +569,7 @@ borderRadius: 5, opacity: 0.4, paddingTop: 20}}>
 }}>
           {this.state.hp_from? 
           this.state.hp_from.map((fromName, index) =>{
-            const fee = this.props.packageById[index].TransferFee;
+            const fee = (this.props.packageById[index])? this.props.packageById[index].TransferFee : 0;
         //  <GridListTile key={index}>
         return    <p key={index}>Club {this.state.hp_to[index]} bought player {this.state.hp_player[index]}
   from Club {fromName} with a transfer fee of {fee? fee:0}</p>

@@ -50,6 +50,8 @@ class TopBar extends Component{
 }
 
 render(){
+  var username = null;
+  if(!this.props.username) username = localStorage.getItem("username");
     return(
       <div>
       <CssBaseline />
@@ -100,7 +102,7 @@ render(){
                   Welcome back, 
                 </Typography>
                   <Link variant="button" color="textPrimary" href="#" style={styles.link}>
-                {this.props.username ? this.props.username : "user"}
+                {this.props.username ? this.props.username : username }
                   </Link>
                 </Grid>
             
