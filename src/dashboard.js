@@ -209,7 +209,7 @@ class Dashboard extends Component{
       hp_from: null,
       hp_to: null,
       hp_player: null,
-      hoverIndex: 0, //request on which the mouse is hovering over
+      hoverIndex: -1, //request on which the mouse is hovering over
 
       listPositions: null,
       currPage: 0,
@@ -645,7 +645,7 @@ render(){
             />,
             tooltip: 'Positions',
             render: rowData => {
-              
+
               const pID = rowData.PlayerID;
 
             return (
@@ -819,7 +819,7 @@ borderRadius: 10}}>
             <PendingPackage pkg={pendingPackage} key={pendingPackage.PackageID}
             click={() => {
               this.setState({ modalOpen: true, packageShown: pendingPackage, 
-              packageReadOnly: true })
+              packageReadOnly: true, hoverIndex: -1 })
               this.props.getPackage(pendingPackage.PackageID)
             } } index={index}
             />) : <div />}
